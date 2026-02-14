@@ -61,3 +61,40 @@
 .wrap { padding-bottom: 24px; }
 
 body { margin: 0; }
+
+/* всегда показываем панель кнопок снизу */
+.nav{
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 28px;           /* оставляем место под серую строку */
+  background: #fff;
+  padding: 12px 16px;
+  border-top: 1px solid #eee;
+  z-index: 9999;
+
+  display: flex;
+  gap: 10px;
+  justify-content: flex-start;
+}
+
+/* чтобы контент не прятался под кнопками */
+.wrap{
+  padding-bottom: 120px;
+}
+
+/* серую строку тоже фиксируем снизу */
+.privacy-note{
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 6px;
+  text-align: center;
+
+  color:#888;
+  font-size: 13px;
+  background: transparent;
+  z-index: 9999;
+}
+
+body { margin: 0; }
