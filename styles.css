@@ -1,86 +1,294 @@
-:root {
-  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+/* styles.css (clean) */
+
+/* ---------- Base / Reset ---------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
 }
 
-.wrap { max-width: 980px; margin: 24px auto; padding: 0 16px; }
-.top h1 { margin: 0 0 8px; }
-.muted { color: #666; margin: 8px 0 16px; }
+html,
+body {
+  height: 100%;
+}
 
-.progress { height: 10px; background: #eee; border-radius: 999px; overflow: hidden; }
-.progress__bar { height: 100%; width: 0%; background: #333; transition: width .2s ease; }
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  color: #111;
+  background: #fff;
+}
 
-.instruction { line-height: 1.45; background: #f7f7f7; padding: 12px; border-radius: 10px; }
+/* Hide elements with the HTML hidden attribute */
+[hidden] {
+  display: none !important;
+}
 
-.field { display: block; margin: 14px 0; }
-.field > span { display: block; margin-bottom: 6px; font-weight: 600; }
+/* ---------- Layout ---------- */
+/* One place to control bottom UI sizes */
+:root {
+  --wrap-max: 980px;
+  --gutter: 28px;
 
-.field input[type="text"] {
-  width: 180px;
-  padding: 8px;
+  --nav-height: 74px;        /* height of bottom button bar */
+  --privacy-height: 44px;    /* height of privacy strip */
+  --bottom-safe: 16px;       /* extra breathing room */
+}
+
+/* Main content wrapper */
+.wrap {
+  max-width: var(--wrap-max);
+  margin: 0 auto;
+  padding: 28px var(--gutter);
+
+  /* Reserve space so content never hides behind fixed bottom bars */
+  padding-bottom: calc(
+    var(--nav-height) + var(--privacy-height) + var(--bottom-safe) + 18px
+  );
+}
+
+/* Header */
+.top h1 {
+  margin: 0 0 10px 0;
+  font-size: 44px;
+  line-height: 1.1;
+  font-weight: 800;
+}
+
+.muted {
+  color: #666;
+  font-size: 16px;
+  margin-top: 10px;
+}
+
+/* ---------- Progress ---------- */
+.progress {
+  height: 10px;
+  border-radius: 999px;
+  background: #e9e9e9;
+  overflow: hidden;
+  margin: 14px 0 0 0;
+}
+
+.progress__bar {
+  height: 100%;
+  width: 0%;
+  background: #111;
+  border-radius: 999px;
+  transition: width 180ms ease;
+}
+
+/* ---------- Steps ---------- */
+.step {
+  margin-top: 26px;
+}
+
+.step h2 {
+  margin: 0 0 16px 0;
+  font-size: 30px;
+  line-height: 1.2;
+  font-weight: 800;
+}
+
+.instruction {
+  font-size: 16px;
+  line-height: 1.5;
+  color: #222;
+  margin-bottom: 18px;
+}
+
+/* ---------- Fields ---------- */
+.field {
+  display: block;
+  margin: 18px 0;
+}
+
+.field > span {
+  display: block;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.field input[type="text"],
+.field input[type="number"] {
+  width: 320px;
+  max-width: 100%;
+  padding: 10px 12px;
+  border-radius: 6px;
+  border: 1px solid #cfcfcf;
+  outline: none;
   font-size: 16px;
 }
 
-.choices { display: flex; gap: 16px; flex-wrap: wrap; }
-.choices.col { display: grid; gap: 8px; }
-
-.checkbox { display: flex; gap: 10px; align-items: center; }
-
-.hint { color: #666; display: block; margin-top: 6px; }
-
-.q { padding: 12px; border: 1px solid #eee; border-radius: 10px; margin: 10px 0; }
-.q .qtext { margin-bottom: 8px; }
-.q .opts { display: grid; gap: 8px; }
-
-.scale-note { display: grid; gap: 6px; margin: 10px 0 16px; }
-.scale-item { color: #444; font-size: 14px; }
-
-.nav { display: flex; gap: 10px; margin-top: 18px; }
-.btn { padding: 10px 14px; font-size: 16px; cursor: pointer; border: 1px solid #333; background: #333; color: #fff; border-radius: 10px; }
-.btn:disabled { opacity: .5; cursor: not-allowed; }
-.secondary { background: #fff; color: #333; border: 1px solid #ccc; }
-
-.error { color: #b00020; margin-top: 10px; }
-.ok { color: #0b6; margin-top: 10px; }
-
-.privacy-note{
-  margin-top: 18px;
-  color:#888;
-  font-size: 13px;
+.field input[type="text"]:focus,
+.field input[type="number"]:focus {
+  border-color: #111;
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.08);
 }
 
-/* нижняя панель с кнопками — всегда поверх всего */
-.nav{
+.hint {
+  display: block;
+  margin-top: 8px;
+  font-size: 13px;
+  color: #777;
+}
+
+.field.checkbox {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.field.checkbox input {
+  margin-top: 3px;
+}
+
+/* ---------- Choices (radio/checkbox groups) ---------- */
+.choices {
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+
+.choices.col {
+  flex-direction: column;
+  gap: 10px;
+}
+
+.choices label {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 16px;
+}
+
+/* ---------- Scale notes ---------- */
+.scale-note {
+  margin: 14px 0 18px 0;
+  padding: 12px 14px;
+  border: 1px solid #eee;
+  border-radius: 10px;
+  background: #fafafa;
+}
+
+.scale-item {
+  font-size: 14px;
+  line-height: 1.35;
+  color: #333;
+}
+
+/* ---------- Messages ---------- */
+.error {
+  margin-top: 14px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #fff2f2;
+  border: 1px solid #ffd0d0;
+  color: #8a1f1f;
+}
+
+.ok {
+  margin-top: 14px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #f1fff2;
+  border: 1px solid #c9f3cd;
+  color: #1f6b2a;
+}
+
+/* ---------- Bottom UI (privacy + nav) ---------- */
+/* Privacy strip sits ABOVE the fixed button bar */
+.privacy-note {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: var(--nav-height);
+  height: var(--privacy-height);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: #f4f4f4;
+  border-top: 1px solid #e6e6e6;
+
+  color: #6f6f6f;
+  font-size: 13px;
+  text-align: center;
+
+  z-index: 99998;
+  padding: 0 16px;
+  pointer-events: none; /* не мешает нажимать */
+}
+
+/* Button bar fixed at the bottom */
+.nav {
   position: fixed;
   left: 0;
   right: 0;
   bottom: 0;
-  z-index: 99999;
+  height: var(--nav-height);
 
-  background: #fff;
-  border-top: 1px solid #eee;
-
-  padding: 14px 16px;       /* нормальная высота панели */
   display: flex;
-  gap: 10px;
   align-items: center;
+  gap: 12px;
+
+  padding: 14px 16px;
+  background: #fff;
+  border-top: 1px solid #e6e6e6;
+
+  z-index: 99999;
 }
 
-/* серую строку делаем частью nav, чтобы она не перекрывала кнопку */
-.privacy-note{
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 58px;             /* выше панели кнопок */
-  text-align: center;
+/* ---------- Buttons ---------- */
+.btn {
+  appearance: none;
+  border: 0;
+  border-radius: 10px;
+  padding: 12px 16px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
 
-  color:#888;
-  font-size: 13px;
-  z-index: 99998;
-  pointer-events: none;
+  background: #111;
+  color: #fff;
 }
 
-.wrap{
-  padding-bottom: 140px;    /* место под панель */
+.btn.secondary {
+  background: #eaeaea;
+  color: #111;
+}
+
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 640px) {
+  :root {
+    --gutter: 16px;
+    --nav-height: 82px;
+    --privacy-height: 52px;
+  }
+
+  .top h1 {
+    font-size: 34px;
+  }
+
+  .step h2 {
+    font-size: 24px;
+  }
+
+  .nav {
+    flex-wrap: wrap;
+    height: auto;
+    min-height: var(--nav-height);
+  }
+
+  .btn {
+    width: 100%;
+  }
 }
 
 body{ margin:0; }
