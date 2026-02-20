@@ -23,10 +23,7 @@
 
         <div class="instruction">
           <!-- ВСТАВЬТЕ СЮДА СВОЙ ТЕКСТ -->
-          <p><em>Бара бара-бере-бере 
-            Контакты для связи:
-            Telegram: @Shiroi_hato
-            kagolub@edu.hse.ru.</em></p>
+          <p><em>Здесь будет ваш текст исследования (цель, структура, длительность, контакты, право прекратить участие и т.д.).</em></p>
         </div>
 
         <label class="field checkbox">
@@ -186,11 +183,27 @@
       <!-- STEP 6: Финал -->
       <section class="step" data-step="6" hidden>
         <h2>Готово</h2>
-        <p>Благодарю за участие! Нажмите “Отправить”, чтобы завершить.</p>
+        <p>Спасибо! Нажмите “Отправить”, чтобы завершить.</p>
         <div id="submitError" class="error" hidden></div>
         <div id="submitOk" class="ok" hidden>Ответы отправлены.</div>
       </section>
 
+      <!-- NAV (ВАЖНО: id должны совпадать с app.js) -->
+      <footer class="nav">
+        <button type="button" id="prevBtn" class="btn secondary" hidden>Назад</button>
+        <button type="button" id="nextBtn" class="btn">Далее</button>
+        <button type="submit" id="submitBtn" class="btn" hidden>Отправить</button>
+      </footer>
+    </form>
+
+    <div class="privacy-note">
+      Все данные строго анонимны, анализ проводится в обобщенном виде
+    </div>
+  </main>
+
+  <script src="app.js?v=2"></script>
+</body>
+</html>
       <footer class="nav">
         <button type="button" id="prevBtn"
 <script src="app.js?v=1"></script>
