@@ -48,37 +48,39 @@
   font-size: 13px;
 }
 
-/* Панель навигации — всегда видна */
+/* нижняя панель с кнопками — всегда поверх всего */
 .nav{
   position: fixed;
   left: 0;
   right: 0;
-  bottom: 0;                 /* панель в самом низу */
-  background: #fff;
-  padding: 12px 16px 34px;   /* запас снизу под строку "анонимно" */
-  border-top: 1px solid #eee;
-  z-index: 10000;
+  bottom: 0;
+  z-index: 99999;
 
+  background: #fff;
+  border-top: 1px solid #eee;
+
+  padding: 14px 16px;       /* нормальная высота панели */
   display: flex;
   gap: 10px;
+  align-items: center;
 }
 
-/* Чтобы контент не уходил под фиксированную панель */
-.wrap{
-  padding-bottom: 140px;
-}
-
-/* Строка про анонимность — поверх панели, но ниже кнопок */
+/* серую строку делаем частью nav, чтобы она не перекрывала кнопку */
 .privacy-note{
   position: fixed;
   left: 0;
   right: 0;
-  bottom: 8px;
+  bottom: 58px;             /* выше панели кнопок */
   text-align: center;
+
   color:#888;
   font-size: 13px;
-  z-index: 10001; /* выше nav, но она внизу и не перекрывает кнопки из-за padding */
-  pointer-events: none; /* чтобы не мешала кликам */
+  z-index: 99998;
+  pointer-events: none;
+}
+
+.wrap{
+  padding-bottom: 140px;    /* место под панель */
 }
 
 body{ margin:0; }
