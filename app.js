@@ -151,7 +151,7 @@ function validateAgeStrict() {
   const ageEl = form?.elements?.["age"];
   if (!ageEl) return true;
   const v = String(ageEl.value || "").trim();
-  return /^\d{1,3}$/.test(v);
+  return /^\d{1,2}$/.test(v);
 }
 
 function validateCurrentStep(showMessages = false) {
@@ -200,11 +200,12 @@ function showStep(n) {
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
-form?.addEventListener("input", updateNextButtonState);
+form.addEventListener("input", updateNextButtonState);
+form.addEventListener("change", updateNextButtonState); // важно для radio
 prevBtn?.addEventListener("click", () => showStep(Math.max(0, currentStep - 1)));
 nextBtn?.addEventListener("click", () => {
   if (!validateCurrentStep(true)) return;
-  showStep(Math.min(steps.length - 1, currentStep + 1));
+  showStep(Math.min(steps.length - 1, currentStep + 1)); updateNextButtonState();
 });
 
 function uuidv4() {
