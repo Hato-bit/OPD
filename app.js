@@ -4,11 +4,14 @@ const SUBMIT_ENDPOINT = "https://opd-osf-submit.golubmoskva.workers.dev/submit";
 
 const steps = Array.from(document.querySelectorAll(".step"));
 const form = document.getElementById("surveyForm");
+
 const prevBtn = document.getElementById("prevBtn");
 const nextBtn = document.getElementById("nextBtn");
 const submitBtn = document.getElementById("submitBtn");
+
 const stepTitle = document.getElementById("stepTitle");
 const progressBar = document.getElementById("progressBar");
+
 const submitError = document.getElementById("submitError");
 const submitOk = document.getElementById("submitOk");
 
@@ -99,7 +102,7 @@ const m3Questions = [
   "…генерирующий новые идеи, оригинально мыслящий.",
 ];
 
-// ---------- Render ----------
+// ---------- Render questions ----------
 function renderQuestions(containerId, prefix, questions, scale) {
   const root = document.getElementById(containerId);
   if (!root) return;
@@ -126,7 +129,6 @@ function renderQuestions(containerId, prefix, questions, scale) {
       input.name = name;
       input.value = String(opt.value);
       input.required = true;
-
       lab.appendChild(input);
       lab.appendChild(document.createTextNode(" " + opt.label));
       opts.appendChild(lab);
@@ -142,9 +144,9 @@ renderQuestions("m1Questions", "m1", m1Questions, m1Scale);
 renderQuestions("m2Questions", "m2", m2Questions, m2Scale);
 renderQuestions("m3Questions", "m3", m3Questions, m3Scale);
 
-// ---------- Steps ----------
+// ---------- Validation + steps ----------
 function isOptionalStep(stepIndex) {
-  return stepIndex === 2; // страница про доходы/трудоустройство
+  return stepIndex === 2; // доходы/трудоустройство
 }
 
 function validateAgeStrict() {
@@ -159,6 +161,7 @@ function validateCurrentStep(showMessages = false) {
 
   const stepEl = steps[currentStep];
   const inputs = Array.from(stepEl.querySelectorAll("input"));
+
   for (const inp of inputs) {
     if (!inp.checkValidity()) {
       if (showMessages) inp.reportValidity();
@@ -167,19 +170,31 @@ function validateCurrentStep(showMessages = false) {
   }
 
   if (currentStep === 1 && !validateAgeStrict()) {
-    if (showMessages) alert("Возраст должен быть числом (1–3 цифры).");
+    if (showMessages) alert("Возраст должен быть числом (1–2 цифры).");
     return false;
   }
+
   return true;
 }
 
 function updateNextButtonState() {
   if (!nextBtn) return;
+
   if (isOptionalStep(currentStep)) {
     nextBtn.disabled = false;
     return;
   }
-  nextBtn.disabled = !validateCurrentStep(false);
+
+  const ok = validateCurrentStep(false);
+  nextBtn.disabled = !ok;
+
+  // диагностика: можно убрать потом
+  console.log("step", currentStep, "valid =", ok, {
+    gender: form?.elements?.["gender"]?.value,
+    age: form?.elements?.["age"]?.value,
+    dx: form?.elements?.["dx"]?.value,
+    ageValid: validateAgeStrict(),
+  });
 }
 
 function showStep(n) {
@@ -200,14 +215,17 @@ function showStep(n) {
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
+// ВАЖНО: change для radio
 form.addEventListener("input", updateNextButtonState);
-form.addEventListener("change", updateNextButtonState); // важно для radio
-prevBtn?.addEventListener("click", () => showStep(Math.max(0, currentStep - 1)));
-nextBtn?.addEventListener("click", () => {
+form.addEventListener("change", updateNextButtonState);
+
+prevBtn.addEventListener("click", () => showStep(Math.max(0, currentStep - 1)));
+nextBtn.addEventListener("click", () => {
   if (!validateCurrentStep(true)) return;
-  showStep(Math.min(steps.length - 1, currentStep + 1)); updateNextButtonState();
+  showStep(Math.min(steps.length - 1, currentStep + 1));
 });
 
+// ---------- Submit ----------
 function uuidv4() {
   return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, c => {
     const r = crypto.getRandomValues(new Uint8Array(1))[0] & 15;
@@ -230,11 +248,12 @@ function getRadioValue(name) {
   return el.value === "" ? null : el.value;
 }
 
-form?.addEventListener("submit", async (e) => {
+form.addEventListener("submit", async (e) => {
   e.preventDefault();
   if (!validateCurrentStep(true)) return;
 
   const respondent_id = uuidv4();
+
   const payload = {
     respondent_id,
     submitted_at: new Date().toISOString(),
@@ -261,6 +280,7 @@ form?.addEventListener("submit", async (e) => {
 
   try {
     submitBtn.disabled = true;
+
     const res = await fetch(SUBMIT_ENDPOINT, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
