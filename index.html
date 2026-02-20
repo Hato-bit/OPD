@@ -2,50 +2,48 @@
 <html lang="ru">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Опрос</title>
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="styles.css?v=2" />
 </head>
+
 <body>
   <main class="wrap">
     <header class="top">
       <h1>Опрос</h1>
-      <div class="progress" aria-label="Прогресс">
+
+      <div class="progress" aria-label="Прогресс прохождения опроса">
         <div id="progressBar" class="progress__bar"></div>
       </div>
-      <p id="stepTitle" class="muted"></p>
+
+      <div id="stepTitle" class="muted">Страница 1 из 7</div>
     </header>
 
     <form id="surveyForm" novalidate>
-      <!-- STEP 0: Инфо + 18+ + согласие -->
-      <section class="step" data-step="0">
-        <h2>Информация об исследовании</h2>
-
+      <!-- STEP 1 / 7 -->
+      <section class="step">
+        <h2>Инструкция</h2>
         <div class="instruction">
-          <!-- ВСТАВЬТЕ СЮДА СВОЙ ТЕКСТ -->
-          <p><em>Здесь будет ваш текст исследования (цель, структура, длительность, контакты, право прекратить участие и т.д.).</em></p>
+          Пожалуйста, ответьте на вопросы максимально честно. Заполнение занимает несколько минут.
         </div>
 
         <label class="field checkbox">
-          <input type="checkbox" name="age18" required />
-          <span>Мне 18+</span>
+          <input type="checkbox" name="consent" required />
+          <span>Я согласен(на) участвовать в исследовании и подтверждаю, что мне 18+.</span>
         </label>
 
-        <label class="field checkbox">
-          <input type="checkbox" name="consent" required />
-          <span>Я согласен(на) на обработку персональных данных</span>
-        </label>
+        <div class="hint">Кнопка «Далее» станет активной после согласия.</div>
       </section>
 
-      <!-- STEP 1: Демография (обязательно) -->
-      <section class="step" data-step="1" hidden>
+      <!-- STEP 2 / 7 (как на скрине) -->
+      <section class="step" hidden>
         <h2>Общие вопросы</h2>
 
         <label class="field">
           <span>Пол</span>
           <div class="choices">
-            <label><input type="radio" name="gender" value="male" required> Мужской</label>
-            <label><input type="radio" name="gender" value="female" required> Женский</label>
+            <label><input type="radio" name="gender" value="male" required /> Мужской</label>
+            <label><input type="radio" name="gender" value="female" required /> Женский</label>
           </div>
         </label>
 
@@ -55,10 +53,10 @@
             type="text"
             name="age"
             inputmode="numeric"
-            pattern="\\d{1,2}"
-            maxlength="2"
+            autocomplete="off"
+            placeholder="Например, 27"
             required
-            placeholder="**"
+            pattern="\d{1,2}"
           />
           <small class="hint">Только цифры, не более двух знаков.</small>
         </label>
@@ -66,141 +64,101 @@
         <label class="field">
           <span>Есть ли диагностированные психические заболевания?</span>
           <div class="choices">
-            <label><input type="radio" name="dx" value="yes" required> Да</label>
-            <label><input type="radio" name="dx" value="no" required> Нет</label>
+            <label><input type="radio" name="dx" value="yes" required /> Да</label>
+            <label><input type="radio" name="dx" value="no" required /> Нет</label>
           </div>
         </label>
       </section>
 
-      <!-- STEP 2: Трудоустройство и доходы (ВСЁ ОПЦИОНАЛЬНО) -->
-      <section class="step" data-step="2" hidden>
-        <h2>Социально-экономические вопросы</h2>
+      <!-- STEP 3 / 7 (опциональный, JS ожидает stepIndex === 2) -->
+      <section class="step" hidden>
+        <h2>Работа и доход (необязательно)</h2>
 
         <label class="field">
-          <span>Трудоустроены ли вы?</span>
-          <div class="choices">
-            <label><input type="radio" name="employed" value="yes"> Да</label>
-            <label><input type="radio" name="employed" value="no"> Нет</label>
+          <span>Трудоустройство</span>
+          <div class="choices col">
+            <label><input type="radio" name="employment" value="employed" /> Работаю</label>
+            <label><input type="radio" name="employment" value="student" /> Учусь</label>
+            <label><input type="radio" name="employment" value="unemployed" /> Не работаю</label>
+            <label><input type="radio" name="employment" value="retired" /> Пенсионер(ка)</label>
+            <label><input type="radio" name="employment" value="other" /> Другое</label>
           </div>
-          <small class="hint">Можно пропустить.</small>
+          <small class="hint">Этот блок можно пропустить — «Далее» доступно всегда.</small>
         </label>
 
         <label class="field">
-          <span>Уровень личного дохода</span>
+          <span>Доход (примерно)</span>
           <div class="choices col">
-            <label><input type="radio" name="income_personal" value="До 30 000 руб."> До 30 000 руб.</label>
-            <label><input type="radio" name="income_personal" value="30 000 — 50 000 руб."> 30 000 — 50 000 руб.</label>
-            <label><input type="radio" name="income_personal" value="50 000 — 75 000 руб."> 50 000 — 75 000 руб.</label>
-            <label><input type="radio" name="income_personal" value="75 000 — 100 000 руб."> 75 000 — 100 000 руб.</label>
-            <label><input type="radio" name="income_personal" value="100 000 — 150 000 руб."> 100 000 — 150 000 руб.</label>
-            <label><input type="radio" name="income_personal" value="150 000 — 200 000 руб."> 150 000 — 200 000 руб.</label>
-            <label><input type="radio" name="income_personal" value="Свыше 200 000 руб."> Свыше 200 000 руб.</label>
+            <label><input type="radio" name="income" value="low" /> Низкий</label>
+            <label><input type="radio" name="income" value="mid" /> Средний</label>
+            <label><input type="radio" name="income" value="high" /> Высокий</label>
+            <label><input type="radio" name="income" value="prefer_not" /> Предпочитаю не отвечать</label>
           </div>
-          <small class="hint">Можно пропустить.</small>
-        </label>
-
-        <label class="field">
-          <span>Уровень дохода семьи</span>
-          <div class="choices col">
-            <label><input type="radio" name="income_family" value="До 30 000 руб."> До 30 000 руб.</label>
-            <label><input type="radio" name="income_family" value="30 000 — 50 000 руб."> 30 000 — 50 000 руб.</label>
-            <label><input type="radio" name="income_family" value="50 000 — 75 000 руб."> 50 000 — 75 000 руб.</label>
-            <label><input type="radio" name="income_family" value="75 000 — 100 000 руб."> 75 000 — 100 000 руб.</label>
-            <label><input type="radio" name="income_family" value="100 000 — 150 000 руб."> 100 000 — 150 000 руб.</label>
-            <label><input type="radio" name="income_family" value="150 000 — 200 000 руб."> 150 000 — 200 000 руб.</label>
-            <label><input type="radio" name="income_family" value="Свыше 200 000 руб."> Свыше 200 000 руб.</label>
-          </div>
-          <small class="hint">Можно пропустить.</small>
         </label>
       </section>
 
-      <!-- STEP 3: Методика 1 (0–4) -->
-      <section class="step" data-step="3" hidden>
-        <h2>Методика 1</h2>
-        <p class="instruction">
-          На следующих страницах вы найдёте ряд утверждений, описывающих различные
-          особенности человека. Пожалуйста, укажите, в какой степени эти утверждения
-          относятся к вам. Отметьте тот вариант ответа, который лучше всего описывает вас в
-          целом. Здесь нет правильных или неправильных ответов, потому что люди по-разному
-          воспринимают себя. Часть утверждений относится к отношениям. Пожалуйста,
-          отвечайте на них, исходя из того, как вы обычно видите себя в отношениях. Если у вас
-          ещё не было романтических отношений, представьте, как вы воспринимали бы себя в
-          них.
-        </p>
+      <!-- STEP 4 / 7 -->
+      <section class="step" hidden>
+        <h2>Утверждения (часть 1)</h2>
 
         <div class="scale-note">
-          <div class="scale-item">Полностью не согласен</div>
-          <div class="scale-item">Скорее не согласен</div>
-          <div class="scale-item">Ни согласен, ни не согласен</div>
-          <div class="scale-item">Скорее согласен</div>
-          <div class="scale-item">Полностью согласен</div>
+          <div class="scale-item">0 — Полностью не согласен</div>
+          <div class="scale-item">1 — Скорее не согласен</div>
+          <div class="scale-item">2 — Ни согласен, ни не согласен</div>
+          <div class="scale-item">3 — Скорее согласен</div>
+          <div class="scale-item">4 — Полностью согласен</div>
         </div>
 
         <div id="m1Questions"></div>
       </section>
 
-      <!-- STEP 4: Методика 2 (1–5) -->
-      <section class="step" data-step="4" hidden>
-        <h2>Методика 2</h2>
-        <p class="instruction">
-          Эта анкета состоит из 24 утверждений о вас и о ваших взаимоотношениях с другими людьми.
-          Пожалуйста, оцените, насколько близко каждое из утверждений описывает вас.
-          Пожалуйста, отвечайте спонтанно, в соответствии с собственным впечатлением.
-          Здесь нет правильных или неправильных ответов, мы хотели бы знать, как вы себя видите.
-        </p>
+      <!-- STEP 5 / 7 -->
+      <section class="step" hidden>
+        <h2>Утверждения (часть 2)</h2>
 
         <div class="scale-note">
-          <div class="scale-item">Утверждение совсем не описывает меня</div>
-          <div class="scale-item">Утверждение едва описывает меня</div>
-          <div class="scale-item">Утверждение умеренно описывает меня</div>
-          <div class="scale-item">Утверждение во многом описывает меня</div>
-          <div class="scale-item">Утверждение полностью описывает меня</div>
+          <div class="scale-item">1 — Утверждение совсем не описывает меня</div>
+          <div class="scale-item">2 — Утверждение едва описывает меня</div>
+          <div class="scale-item">3 — Утверждение умеренно описывает меня</div>
+          <div class="scale-item">4 — Утверждение во многом описывает меня</div>
+          <div class="scale-item">5 — Утверждение полностью описывает меня</div>
         </div>
 
         <div id="m2Questions"></div>
       </section>
 
-      <!-- STEP 5: Методика 3 (1–5) -->
-      <section class="step" data-step="5" hidden>
-        <h2>Методика 3</h2>
-        <p class="instruction">
-          Ниже приведен список качеств, которые могут вас характеризовать или не характеризовать.
-          Например, вы согласны с тем, что вы – человек, которому нравится проводить время с другими людьми?
-          Пожалуйста, выберите степень вашего согласия или несогласия с каждым пунктом.
-        </p>
-
-        <div class="scale-note">
-          <div class="scale-item">Совершенно не согласен</div>
-          <div class="scale-item">Немного не согласен</div>
-          <div class="scale-item">Нейтрально, нет мнения</div>
-          <div class="scale-item">Немного согласен</div>
-          <div class="scale-item">Совершенно согласен</div>
-        </div>
-
+      <!-- STEP 6 / 7 -->
+      <section class="step" hidden>
+        <h2>Утверждения (часть 3)</h2>
         <div id="m3Questions"></div>
       </section>
 
-      <!-- STEP 6: Финал -->
-      <section class="step" data-step="6" hidden>
-        <h2>Готово</h2>
-        <p>Спасибо! Нажмите “Отправить”, чтобы завершить.</p>
-        <div id="submitError" class="error" hidden></div>
-        <div id="submitOk" class="ok" hidden>Ответы отправлены.</div>
+      <!-- STEP 7 / 7 -->
+      <section class="step" hidden>
+        <h2>Завершение</h2>
+        <div class="instruction">
+          Нажмите «Отправить», чтобы завершить опрос.
+        </div>
+
+        <div id="submitError" class="error" hidden>Не удалось отправить ответы. Попробуйте ещё раз.</div>
+        <div id="submitOk" class="ok" hidden>Спасибо! Ответы успешно отправлены.</div>
       </section>
 
-      <!-- NAV (ВАЖНО: id должны совпадать с app.js) -->
+      <!-- ВАЖНО: одна (!) плашка -->
+      <div class="privacy-note">
+        Все данные строго анонимны, анализ проводится в обобщенном виде
+      </div>
+
+      <!-- ВАЖНО: один (!) футер с кнопками -->
       <footer class="nav">
         <button type="button" id="prevBtn" class="btn secondary" hidden>Назад</button>
-        <button type="button" id="nextBtn" class="btn">Далее</button>
+        <button type="button" id="nextBtn" class="btn" disabled>Далее</button>
         <button type="submit" id="submitBtn" class="btn" hidden>Отправить</button>
       </footer>
     </form>
-
-    <div class="privacy-note">
-      Все данные строго анонимны, анализ проводится в обобщенном виде
-    </div>
   </main>
 
+  <!-- ВАЖНО: один (!) подключенный скрипт, строго внутри <body> -->
   <script src="app.js?v=2"></script>
 </body>
 </html>
