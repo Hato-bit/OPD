@@ -102,8 +102,9 @@ const m3Questions = [
 // ---------- Render ----------
 function renderQuestions(containerId, prefix, questions, scale) {
   const root = document.getElementById(containerId);
-  root.innerHTML = "";
+  if (!root) return;
 
+  root.innerHTML = "";
   questions.forEach((qText, idx) => {
     const qNum = idx + 1;
     const name = `${prefix}_${qNum}`;
@@ -123,11 +124,11 @@ function renderQuestions(containerId, prefix, questions, scale) {
       const input = document.createElement("input");
       input.type = "radio";
       input.name = name;
-      input.value = String(opt.value); // в данных — цифра
-      input.required = true;           // обязателен
+      input.value = String(opt.value);
+      input.required = true;
 
       lab.appendChild(input);
-      lab.appendChild(document.createTextNode(" " + opt.label)); // на экране — текст
+      lab.appendChild(document.createTextNode(" " + opt.label));
       opts.appendChild(lab);
     });
 
@@ -141,13 +142,13 @@ renderQuestions("m1Questions", "m1", m1Questions, m1Scale);
 renderQuestions("m2Questions", "m2", m2Questions, m2Scale);
 renderQuestions("m3Questions", "m3", m3Questions, m3Scale);
 
-// ---------- Step logic ----------
+// ---------- Steps ----------
 function isOptionalStep(stepIndex) {
-  return stepIndex === 2; // страница трудоустройства/доходов
+  return stepIndex === 2; // страница про доходы/трудоустройство
 }
 
 function validateAgeStrict() {
-  const ageEl = form.elements["age"];
+  const ageEl = form?.elements?.["age"];
   if (!ageEl) return true;
   const v = String(ageEl.value || "").trim();
   return /^\d{1,3}$/.test(v);
@@ -158,7 +159,6 @@ function validateCurrentStep(showMessages = false) {
 
   const stepEl = steps[currentStep];
   const inputs = Array.from(stepEl.querySelectorAll("input"));
-
   for (const inp of inputs) {
     if (!inp.checkValidity()) {
       if (showMessages) inp.reportValidity();
@@ -170,13 +170,11 @@ function validateCurrentStep(showMessages = false) {
     if (showMessages) alert("Возраст должен быть числом (1–3 цифры).");
     return false;
   }
-
   return true;
 }
 
 function updateNextButtonState() {
-  if (nextBtn.hidden) return;
-
+  if (!nextBtn) return;
   if (isOptionalStep(currentStep)) {
     nextBtn.disabled = false;
     return;
@@ -188,33 +186,27 @@ function showStep(n) {
   steps.forEach((s, i) => (s.hidden = i !== n));
   currentStep = n;
 
-  prevBtn.hidden = n === 0;
-  nextBtn.hidden = n === steps.length - 1;
-  submitBtn.hidden = n !== steps.length - 1;
+  if (prevBtn) prevBtn.hidden = n === 0;
+  if (nextBtn) nextBtn.hidden = n === steps.length - 1;
+  if (submitBtn) submitBtn.hidden = n !== steps.length - 1;
 
-  stepTitle.textContent = `Страница ${n + 1} из ${steps.length}`;
-  progressBar.style.width = `${(n / (steps.length - 1)) * 100}%`;
+  if (stepTitle) stepTitle.textContent = `Страница ${n + 1} из ${steps.length}`;
+  if (progressBar) progressBar.style.width = `${(n / (steps.length - 1)) * 100}%`;
 
   if (submitError) submitError.hidden = true;
   if (submitOk) submitOk.hidden = true;
 
   updateNextButtonState();
-
-  // UX: при переходе — вверх
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
-form.addEventListener("input", () => updateNextButtonState());
-
-prevBtn.addEventListener("click", () => showStep(Math.max(0, currentStep - 1)));
-
-nextBtn.addEventListener("click", () => {
-  const ok = validateCurrentStep(true);
-  if (!ok) return;
+form?.addEventListener("input", updateNextButtonState);
+prevBtn?.addEventListener("click", () => showStep(Math.max(0, currentStep - 1)));
+nextBtn?.addEventListener("click", () => {
+  if (!validateCurrentStep(true)) return;
   showStep(Math.min(steps.length - 1, currentStep + 1));
 });
 
-// ---------- Submit ----------
 function uuidv4() {
   return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, c => {
     const r = crypto.getRandomValues(new Uint8Array(1))[0] & 15;
@@ -226,26 +218,22 @@ function uuidv4() {
 function extractScale(prefix, n) {
   const out = {};
   for (let i = 1; i <= n; i++) {
-    const name = `${prefix}_${i}`;
-    out[name] = Number(form.elements[name].value);
+    out[`${prefix}_${i}`] = Number(form.elements[`${prefix}_${i}`].value);
   }
   return out;
 }
 
 function getRadioValue(name) {
-  const el = form.elements[name];
+  const el = form?.elements?.[name];
   if (!el) return null;
   return el.value === "" ? null : el.value;
 }
 
-form.addEventListener("submit", async (e) => {
+form?.addEventListener("submit", async (e) => {
   e.preventDefault();
-
-  const ok = validateCurrentStep(true);
-  if (!ok) return;
+  if (!validateCurrentStep(true)) return;
 
   const respondent_id = uuidv4();
-
   const payload = {
     respondent_id,
     submitted_at: new Date().toISOString(),
@@ -272,7 +260,6 @@ form.addEventListener("submit", async (e) => {
 
   try {
     submitBtn.disabled = true;
-
     const res = await fetch(SUBMIT_ENDPOINT, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -285,8 +272,6 @@ form.addEventListener("submit", async (e) => {
     }
 
     submitOk.hidden = false;
-    // защита от повторной отправки той же формы
-    submitBtn.disabled = true;
   } catch (err) {
     submitError.textContent = err?.message || String(err);
     submitError.hidden = false;
