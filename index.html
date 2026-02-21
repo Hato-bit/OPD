@@ -28,14 +28,19 @@
         </div>
 
         <label class="field checkbox">
+          <input type="checkbox" name="age18" required />
+          <span>Мне есть 18 лет.</span>
+        </label>
+
+        <label class="field checkbox">
           <input type="checkbox" name="consent" required />
-          <span>Я согласен(на) участвовать в исследовании и подтверждаю, что мне 18+.</span>
+          <span>Я согласен(на) участвовать в исследовании.</span>
         </label>
 
         <div class="hint">Кнопка «Далее» станет активной после согласия.</div>
       </section>
 
-      <!-- STEP 2 / 7 (как на скрине) -->
+      <!-- STEP 2 / 7 -->
       <section class="step" hidden>
         <h2>Общие вопросы</h2>
 
@@ -70,7 +75,7 @@
         </label>
       </section>
 
-      <!-- STEP 3 / 7 (опциональный, JS ожидает stepIndex === 2) -->
+      <!-- STEP 3 / 7 -->
       <section class="step" hidden>
         <h2>Работа и доход (необязательно)</h2>
 
@@ -144,12 +149,10 @@
         <div id="submitOk" class="ok" hidden>Спасибо! Ответы успешно отправлены.</div>
       </section>
 
-      <!-- ВАЖНО: одна (!) плашка -->
       <div class="privacy-note">
         Все данные строго анонимны, анализ проводится в обобщенном виде
       </div>
 
-      <!-- ВАЖНО: один (!) футер с кнопками -->
       <footer class="nav">
         <button type="button" id="prevBtn" class="btn secondary" hidden>Назад</button>
         <button type="button" id="nextBtn" class="btn" disabled>Далее</button>
@@ -158,10 +161,6 @@
     </form>
   </main>
 
-  <!-- ВАЖНО: один (!) подключенный скрипт, строго внутри <body> -->
   <script src="app.js?v=2"></script>
 </body>
 </html>
-      <footer class="nav">
-        <button type="button" id="prevBtn"
-<script src="app.js?v=1"></script>
