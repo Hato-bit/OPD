@@ -253,8 +253,11 @@ form.addEventListener("submit", async (e) => {
   if (!validateCurrentStep(true)) return;
 
   const respondent_id = uuidv4();
+  const employment = getRadioValue("employment");
+  const income = getRadioValue("income");
 
   const payload = {
+    schema_version: "1.1",
     respondent_id,
     submitted_at: new Date().toISOString(),
     consent: {
@@ -267,9 +270,12 @@ form.addEventListener("submit", async (e) => {
       dx: getRadioValue("dx"),
     },
     socioeconomic: {
-      employed: getRadioValue("employed"),
-      income_personal: getRadioValue("income_personal"),
-      income_family: getRadioValue("income_family"),
+      employment,
+      income,
+      // Backward-compatible aliases for older worker schema.
+      employed: employment,
+      income_personal: income,
+      income_family: income,
     },
     responses: {
       m1: extractScale("m1", m1Questions.length),
@@ -299,6 +305,10 @@ form.addEventListener("submit", async (e) => {
     submitBtn.disabled = false;
   }
 });
+
+// start
+showStep(0);
+
 
 // start
 showStep(0);
