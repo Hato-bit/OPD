@@ -177,6 +177,54 @@ body {
   color: #333;
 }
 
+/* ---------- Scale pages (steps 4-6) ---------- */
+.page-instruction {
+  margin: 12px 0 20px;
+  padding: 12px 14px;
+  border: 1px solid #ededed;
+  border-radius: 10px;
+  background: #fafafa;
+  color: #222;
+  font-size: 15px;
+  line-height: 1.45;
+  white-space: pre-line;
+}
+
+.q {
+  margin: 0 0 26px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid #efefef;
+}
+
+.q:last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+.qtext {
+  margin-bottom: 12px;
+  font-size: 17px;
+  line-height: 1.45;
+}
+
+.opts {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.opts label {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 10px;
+  line-height: 1.35;
+}
+
+.opts input[type="radio"] {
+  margin-top: 2px;
+}
+
 /* ---------- Messages ---------- */
 .error {
   margin-top: 14px;
