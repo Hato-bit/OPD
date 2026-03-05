@@ -255,17 +255,18 @@ form.addEventListener("submit", async (e) => {
   const respondent_id = uuidv4();
   const employment = getRadioValue("employment");
   const income = getRadioValue("income");
+  const user_label = String(form.elements["user_label"]?.value || "").trim();
 
   const payload = {
-    schema_version: "1.2",
+    schema_version: "1.3",
     respondent_id,
+    user_label,
     submitted_at: new Date().toISOString(),
     consent: {
       age18: !!form.elements["age18"]?.checked,
       pdn: !!form.elements["consent"]?.checked,
     },
     demographics: {
-      participant_id: String(form.elements["participant_id"]?.value || "").trim() || null,
       gender: getRadioValue("gender"),
       age: Number(String(form.elements["age"]?.value || "").trim()),
       dx: getRadioValue("dx"),
