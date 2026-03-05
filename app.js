@@ -42,11 +42,11 @@ const m1Questions = [
 ];
 
 const m2Scale = [
-  { value: 1, label: "Утверждение совсем не описывает меня" },
-  { value: 2, label: "Утверждение едва описывает меня" },
-  { value: 3, label: "Утверждение умеренно описывает меня" },
-  { value: 4, label: "Утверждение во многом описывает меня" },
-  { value: 5, label: "Утверждение полностью описывает меня" },
+  { value: 0, label: "Утверждение совсем не описывает меня" },
+  { value: 1, label: "Утверждение едва описывает меня" },
+  { value: 2, label: "Утверждение умеренно описывает меня" },
+  { value: 3, label: "Утверждение во многом описывает меня" },
+  { value: 4, label: "Утверждение полностью описывает меня" },
 ];
 
 const m2Questions = [
@@ -257,7 +257,7 @@ form.addEventListener("submit", async (e) => {
   const income = getRadioValue("income");
 
   const payload = {
-    schema_version: "1.1",
+    schema_version: "1.2",
     respondent_id,
     submitted_at: new Date().toISOString(),
     consent: {
@@ -309,6 +309,3 @@ form.addEventListener("submit", async (e) => {
 // start
 showStep(0);
 
-
-// start
-showStep(0);
