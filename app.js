@@ -265,6 +265,7 @@ form.addEventListener("submit", async (e) => {
       pdn: !!form.elements["consent"]?.checked,
     },
     demographics: {
+      participant_id: String(form.elements["participant_id"]?.value || "").trim() || null,
       gender: getRadioValue("gender"),
       age: Number(String(form.elements["age"]?.value || "").trim()),
       dx: getRadioValue("dx"),
@@ -308,4 +309,3 @@ form.addEventListener("submit", async (e) => {
 
 // start
 showStep(0);
-
