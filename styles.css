@@ -64,6 +64,42 @@ body {
   line-height: 1.5;
 }
 
+.intro-copy {
+  max-width: 720px;
+}
+
+.intro-title {
+  margin: 0 0 14px;
+  font-size: clamp(28px, 4.5vw, 42px);
+  line-height: 1.1;
+  font-weight: 800;
+}
+
+.intro-paragraph {
+  margin: 0 0 14px;
+  color: #2f3745;
+  font-size: 16px;
+  line-height: 1.68;
+}
+
+.intro-section-title {
+  margin: 0 0 8px;
+  font-size: 17px;
+  font-weight: 700;
+  color: #1d2430;
+}
+
+.intro-list {
+  margin: 0 0 14px 20px;
+  padding: 0;
+  color: #2f3745;
+  line-height: 1.68;
+}
+
+.intro-list li {
+  margin: 0 0 6px;
+}
+
 .checks {
   margin-top: 16px;
   display: grid;
@@ -326,6 +362,16 @@ body {
     min-width: 98px;
     padding: 9px 12px;
     font-size: 14px;
+  }
+
+  .intro-title {
+    margin-bottom: 12px;
+  }
+
+  .intro-paragraph,
+  .intro-list {
+    font-size: 15px;
+    line-height: 1.62;
   }
 
   .privacy-note {
