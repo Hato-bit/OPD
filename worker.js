@@ -183,10 +183,6 @@ function appendQuery(url, params) {
   return u.toString();
 }
 
-function escapeRegExp(str) {
-  return String(str).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-}
-
 function sanitizeLabel(input) {
   let value = typeof input === "string" ? input : "";
   if (value.normalize) {
@@ -350,8 +346,8 @@ async function uploadFile(folderRef, fileName, body, token, contentType) {
   return { conflict: false };
 }
 
-function extractNextIndexFromFolderListing(items, safeLabel) {
-  const re = new RegExp(`^${escapeRegExp(safeLabel)}_(\\d+)\\.csv$`);
+function extractNextGlobalIndexFromFolderListing(items) {
+  const re = /_(\d+)\.csv$/;
   let maxIndex = 0;
 
   for (const item of items) {
@@ -588,7 +584,7 @@ export default {
       const allRowsFolder = await ensureFolder(base, "all_rows", token);
 
       const allRowsItems = await listAllChildren(allRowsFolder.childrenHref, token, "List all_rows files");
-      const startSeq = extractNextIndexFromFolderListing(allRowsItems, safeLabel);
+      const startSeq = extractNextGlobalIndexFromFolderListing(allRowsItems);
 
       const rawBody = `${JSON.stringify(parsedBody, null, 2)}\n`;
 
@@ -637,7 +633,6 @@ export default {
 
       if (!fileBase) {
         throw new HttpError(500, "Could not reserve unique file sequence", {
-          safeLabel,
           startSeq,
           maxAttempts: MAX_RESERVE_ATTEMPTS,
         });
