@@ -378,23 +378,7 @@ body {
 
 .result-row__fill {
   height: 100%;
-  background: #4f6fd5;
-}
-
-.result-row__fill.fill-opd {
-  background: #3e8fe5;
-}
-
-.result-row__fill.fill-sifs {
-  background: #3a8de5;
-}
-
-.result-row__fill.fill-sifs-light {
-  background: #62b2de;
-}
-
-.result-row__fill.fill-bfi {
-  background: #3f68c6;
+  background: linear-gradient(90deg, hsl(264 72% 82%), var(--fill-color, hsl(264 78% 52%)));
 }
 
 .result-row__value {
@@ -419,8 +403,23 @@ body {
   font-size: 20px;
 }
 
+.result-interpretation h5 {
+  margin: 14px 0 8px;
+  font-size: 18px;
+}
+
 .result-interpretation p {
   margin: 0 0 10px;
+  line-height: 1.55;
+}
+
+.result-list {
+  margin: 8px 0 0 20px;
+  padding: 0;
+}
+
+.result-list li {
+  margin: 0 0 8px;
   line-height: 1.55;
 }
 
