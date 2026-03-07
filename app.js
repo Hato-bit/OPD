@@ -354,14 +354,14 @@ function sifsSeverity(value) {
   if (value < 1.3) return "минимальная выраженность личностной дисфункции";
   if (value < 1.9) return "лёгкая выраженность личностной дисфункции";
   if (value < 2.5) return "умеренная выраженность личностной дисфункции";
-  if (value < 4) return "высокая выраженность личностной дисфункции";
   return "высокая выраженность личностной дисфункции";
 }
 
-function fillOpacity(value, min, max) {
-  if (typeof value !== "number") return 0.55;
+function purpleScaleColor(value, min, max) {
+  if (typeof value !== "number") return "hsl(262 56% 66%)";
   const ratio = pct(value, min, max) / 100;
-  return 0.55 + ratio * 0.45;
+  const lightness = 68 - ratio * 34;
+  return `hsl(262 66% ${lightness.toFixed(1)}%)`;
 }
 
 function buildResultsModel() {
@@ -410,14 +410,35 @@ function buildResultsModel() {
 }
 
 function renderBarRow(label, value, min, max, decimals = 2) {
-  const opacity = fillOpacity(value, min, max);
+  const fillColor = purpleScaleColor(value, min, max);
   return `
     <div class="result-row">
       <div class="result-row__label">${label}</div>
       <div class="result-row__bar">
-        <div class="result-row__fill" style="width:${pct(value, min, max)}%; --fill-opacity:${opacity};"></div>
+        <div class="result-row__fill" style="width:${pct(value, min, max)}%; --fill-color:${fillColor};"></div>
       </div>
       <div class="result-row__value">${fmtWith(value, decimals)}</div>
+    </div>
+  `;
+}
+
+function renderThresholdRow(min, max, marks) {
+  const marksHtml = marks
+    .map((m) => {
+      const x = pct(m.value, min, max);
+      const tone = m.tone ? ` threshold-${m.tone}` : "";
+      let shift = "translateX(-50%)";
+      if (m.value <= min) shift = "translateX(0)";
+      if (m.value >= max) shift = "translateX(-100%)";
+      return `<span class="threshold-mark${tone}" style="left:${x}%; transform:${shift};">${m.label}</span>`;
+    })
+    .join("");
+
+  return `
+    <div class="result-threshold-row">
+      <div></div>
+      <div class="result-threshold-track">${marksHtml}</div>
+      <div></div>
     </div>
   `;
 }
@@ -655,12 +676,22 @@ function renderResults() {
         <h3 class="result-block__title">PHQ-4</h3>
         ${renderBarRow("Тревога", r.phqAnxiety, 0, 6, 0)}
         ${renderBarRow("Депрессия", r.phqDepression, 0, 6, 0)}
+        ${renderThresholdRow(0, 6, [
+          { value: 0, label: "[0", tone: "low" },
+          { value: 2, label: "2]", tone: "low" },
+          { value: 3, label: "[3", tone: "high" },
+          { value: 6, label: "6]", tone: "high" },
+        ])}
         <p class="result-note">Тревога и депрессия считаются клинически значимыми при значениях <strong>≥ 3</strong>.</p>
       </section>
 
       <section class="result-block">
         <h3 class="result-block__title">OPD-SQS</h3>
         ${renderBarRow("Общий балл", r.opdTotalSum, 0, 48, 0)}
+        ${renderThresholdRow(0, 48, [
+          { value: 0, label: "[0", tone: "low" },
+          { value: 48, label: "48]", tone: "high" },
+        ])}
         <p class="result-note">Технические баллы. Опросник в процессе адаптации.</p>
       </section>
 
@@ -671,6 +702,13 @@ function renderResults() {
         ${renderBarRow("Самонаправленность", r.sifsSelfDirection, 0, 4)}
         ${renderBarRow("Эмпатия", r.sifsEmpathy, 0, 4)}
         ${renderBarRow("Потребность в доверительных отношениях", r.sifsIntimacy, 0, 4)}
+        ${renderThresholdRow(0, 4, [
+          { value: 0, label: "[0", tone: "low" },
+          { value: 1.3, label: "1.30]", tone: "low" },
+          { value: 1.9, label: "[1.90", tone: "mid" },
+          { value: 2.5, label: "2.50]", tone: "mid" },
+          { value: 4, label: "[4]", tone: "high" },
+        ])}
         <p class="result-note">Интерпретация общего индекса: <strong>${sifsSeverity(r.sifsTotal)}</strong>.</p>
         <div class="result-interpretation">
           <h4>Содержательная интерпретация</h4>
@@ -686,11 +724,20 @@ function renderResults() {
 
       <section class="result-block">
         <h3 class="result-block__title">BFI-2-XS</h3>
-        ${renderBarRow("Экстраверсия", r.bfiExtraversion, 1, 5)}
-        ${renderBarRow("Доброжелательность", r.bfiAgreeableness, 1, 5)}
-        ${renderBarRow("Добросовестность", r.bfiConscientiousness, 1, 5)}
-        ${renderBarRow("Негативная эмоциональность", r.bfiNegativeEmotionality, 1, 5)}
-        ${renderBarRow("Открытость опыту", r.bfiOpenness, 1, 5)}
+        ${renderBarRow("Экстраверсия", r.bfiExtraversion, 1, 5, 1)}
+        ${renderBarRow("Доброжелательность", r.bfiAgreeableness, 1, 5, 1)}
+        ${renderBarRow("Добросовестность", r.bfiConscientiousness, 1, 5, 1)}
+        ${renderBarRow("Негативная эмоциональность", r.bfiNegativeEmotionality, 1, 5, 1)}
+        ${renderBarRow("Открытость опыту", r.bfiOpenness, 1, 5, 1)}
+        ${renderThresholdRow(1, 5, [
+          { value: 1, label: "[1", tone: "low" },
+          { value: 2.1, label: "2.1]", tone: "low" },
+          { value: 2.2, label: "[2.2", tone: "mid" },
+          { value: 3.8, label: "3.8]", tone: "mid" },
+          { value: 3.9, label: "[3.9", tone: "high" },
+          { value: 5, label: "5]", tone: "high" },
+        ])}
+        <p class="result-note"><span class="threshold-low">ниже среднего</span> ⇒ <span class="threshold-mid">среднее</span> ⇒ <span class="threshold-high">выше среднего</span></p>
 
         <div class="result-interpretation">
           <h4>Содержательная интерпретация</h4>

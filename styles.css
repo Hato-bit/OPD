@@ -402,12 +402,46 @@ body {
   border-radius: 6px;
   background: repeating-linear-gradient(to right, #ececf2 0 4%, #e4e5ea 4% 4.3%);
   overflow: hidden;
+  position: relative;
 }
 
 .result-row__fill {
   height: 100%;
-  background: linear-gradient(90deg, #72d2ff 0%, #3f78ff 52%, #6f2ccf 100%);
-  opacity: var(--fill-opacity, 0.8);
+  background: var(--fill-color, hsl(262 66% 52%));
+}
+
+.result-threshold-row {
+  display: grid;
+  grid-template-columns: minmax(130px, 260px) 1fr minmax(50px, 70px);
+  gap: 12px;
+  margin-top: -2px;
+  margin-bottom: 8px;
+}
+
+.result-threshold-track {
+  position: relative;
+  height: 22px;
+}
+
+.threshold-mark {
+  position: absolute;
+  bottom: 0;
+  transform: translateX(-50%);
+  font-size: 14px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.threshold-low {
+  color: #6e5ec0;
+}
+
+.threshold-mid {
+  color: #5037b3;
+}
+
+.threshold-high {
+  color: #2d178f;
 }
 
 .result-row__value {
@@ -506,6 +540,15 @@ body {
     text-align: left;
   }
 
+  .result-threshold-row {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+
+  .result-threshold-track {
+    margin-top: -2px;
+  }
+
   .results-top {
     flex-direction: column;
     align-items: flex-start;
@@ -513,6 +556,11 @@ body {
 }
 
 @media print {
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
   body {
     background: #fff;
   }
