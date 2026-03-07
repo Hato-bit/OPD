@@ -10,9 +10,6 @@ const prevBtn = document.getElementById("prevBtn");
 const nextBtn = document.getElementById("nextBtn");
 const submitBtn = document.getElementById("submitBtn");
 
-const submitError = document.getElementById("submitError");
-const submitOk = document.getElementById("submitOk");
-
 const phq4Scale = [
   { value: 0, label: "Совсем нет" },
   { value: 1, label: "В течение нескольких дней" },
@@ -171,6 +168,7 @@ const state = {
   currentScreenIndex: 0,
   submitting: false,
   submitted: false,
+  submitErrorText: "",
   autoAdvancing: false,
   consent: {
     age18: false,
@@ -277,18 +275,10 @@ function findFirstMissingQuestionScreenIndex() {
   return -1;
 }
 
-function clearMessages() {
-  submitError.hidden = true;
-  if (!state.submitted) {
-    submitOk.hidden = true;
-  }
-}
-
 function goTo(index) {
   if (index < 0 || index >= screens.length) return;
   state.currentScreenIndex = index;
   state.autoAdvancing = false;
-  clearMessages();
   render();
 }
 
@@ -408,15 +398,13 @@ function renderInstrumentIntro(screen) {
 
 function renderQuestion(screen) {
   const instrument = instruments[screen.instrumentId];
-  const selected = state.responses[screen.instrumentId][screen.responseKey];
   const percent = Math.round((screen.questionIndex / screen.total) * 100);
 
   const answers = instrument.scale
     .map((opt) => {
-      const selectedClass = selected === opt.value ? "is-selected" : "";
       const disabledAttr = state.autoAdvancing ? "disabled" : "";
       return `
-        <button type="button" class="answer-card ${selectedClass}" data-value="${opt.value}" ${disabledAttr}>
+        <button type="button" class="answer-card" data-value="${opt.value}" ${disabledAttr}>
           <span class="answer-label">${opt.label}</span>
         </button>
       `;
@@ -464,10 +452,19 @@ function renderQuestion(screen) {
 }
 
 function renderSubmit() {
+  const successHtml = state.submitted
+    ? `<div class="ok">Спасибо! Ответы успешно отправлены.</div>`
+    : "";
+  const errorHtml = state.submitErrorText
+    ? `<div class="error">${state.submitErrorText}</div>`
+    : "";
+
   screenRoot.innerHTML = `
     <article class="screen-card">
       <h2>Завершение</h2>
       <p class="lead">Проверьте ответы и нажмите «Отправить» для завершения исследования.</p>
+      ${successHtml}
+      ${errorHtml}
     </article>
   `;
 }
@@ -510,8 +507,6 @@ function updateNavState() {
 function render() {
   const screen = getCurrentScreen();
 
-  clearMessages();
-
   if (screen.type === "intro") {
     renderIntro();
   } else if (screen.type === "demographics") {
@@ -548,8 +543,7 @@ async function handleSubmit(e) {
 
   const firstMissing = findFirstMissingQuestionScreenIndex();
   if (firstMissing >= 0) {
-    submitError.textContent = "Пожалуйста, ответьте на все вопросы перед отправкой.";
-    submitError.hidden = false;
+    state.submitErrorText = "Пожалуйста, ответьте на все вопросы перед отправкой.";
     goTo(firstMissing);
     return;
   }
@@ -557,6 +551,7 @@ async function handleSubmit(e) {
   try {
     state.submitting = true;
     state.submitted = false;
+    state.submitErrorText = "";
     updateNavState();
 
     const payload = buildPayload();
@@ -573,10 +568,11 @@ async function handleSubmit(e) {
     }
 
     state.submitted = true;
-    submitOk.hidden = false;
+    state.submitErrorText = "";
+    render();
   } catch (err) {
-    submitError.textContent = err?.message || String(err);
-    submitError.hidden = false;
+    state.submitErrorText = err?.message || String(err);
+    render();
   } finally {
     state.submitting = false;
     updateNavState();

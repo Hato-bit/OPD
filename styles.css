@@ -213,9 +213,9 @@ body {
 }
 
 .answer-card.is-selected {
-  border-color: #1d2430;
-  background: #eef3ff;
-  box-shadow: 0 0 0 2px rgba(29, 36, 48, 0.08);
+  border-color: #d7dce5;
+  background: #fff;
+  box-shadow: none;
 }
 
 .answer-card:disabled {
@@ -266,8 +266,13 @@ body {
 .nav-row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   gap: 10px;
+}
+
+#nextBtn,
+#submitBtn {
+  margin-left: auto;
 }
 
 .btn {
