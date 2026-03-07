@@ -513,7 +513,7 @@ function updateNavState() {
   if (isSubmit) {
     nextBtn.hidden = true;
     submitBtn.hidden = false;
-    submitBtn.disabled = state.submitting;
+    submitBtn.disabled = state.submitting || state.submitted;
     return;
   }
 
@@ -564,6 +564,7 @@ async function handleSubmit(e) {
 
   const screen = getCurrentScreen();
   if (screen.type !== "submit") return;
+  if (state.submitted || state.submitting) return;
 
   const firstMissing = findFirstMissingQuestionScreenIndex();
   if (firstMissing >= 0) {
