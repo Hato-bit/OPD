@@ -832,7 +832,7 @@ function updateNavState() {
 
 function render() {
   const screen = getCurrentScreen();
-  topHeader.hidden = screen.type === "question";
+  topHeader.hidden = screen.type !== "intro";
 
   if (screen.type === "intro") {
     renderIntro();
