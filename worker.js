@@ -28,22 +28,11 @@ const CSV_HEADERS = [
   "age",
   "dx",
   ...Array.from({ length: PHQ4_COUNT }, (_, i) => `phq4_${i + 1}_raw`),
-  ...Array.from({ length: M1_COUNT }, (_, i) => `m1_${i + 1}_raw`),
-  ...Array.from({ length: M2_COUNT }, (_, i) => `m2_${i + 1}_raw`),
-  ...Array.from({ length: M3_COUNT }, (_, i) => `m3_${i + 1}_raw`),
-  "m2_1_keyed",
-  "m2_6_keyed",
-  "m2_8_keyed",
-  "m2_12_keyed",
-  "m2_17_keyed",
-  "m2_19_keyed",
-  "m2_24_keyed",
-  "m3_1_keyed",
-  "m3_3_keyed",
-  "m3_7_keyed",
-  "m3_8_keyed",
-  "m3_10_keyed",
-  "m3_14_keyed",
+  ...Array.from({ length: M1_COUNT }, (_, i) => `opd_${i + 1}_raw`),
+  ...Array.from({ length: M2_COUNT }, (_, i) => `sifs_${i + 1}_raw`),
+  ...Array.from({ length: M2_COUNT }, (_, i) => `sifs_${i + 1}_keyed`),
+  ...Array.from({ length: M3_COUNT }, (_, i) => `bfi_${i + 1}_raw`),
+  ...Array.from({ length: M3_COUNT }, (_, i) => `bfi_${i + 1}_keyed`),
   "phq4_anxiety_sum",
   "phq4_depression_sum",
   "phq4_total_sum",
@@ -62,9 +51,9 @@ const CSV_HEADERS = [
   "bfi_negative_emotionality_mean",
   "bfi_openness_mean",
   "phq4_missing",
-  "m1_missing",
-  "m2_missing",
-  "m3_missing",
+  "opd_missing",
+  "sifs_missing",
+  "bfi_missing",
 ];
 
 class HttpError extends Error {
@@ -462,9 +451,9 @@ function scoreRow(payload, fileLabel, fileSeq) {
     file_seq: fileSeq,
     user_label: payload.user_label || "",
     submitted_at: payload.submitted_at || "",
-    gender: demographics.gender || "",
+    gender: normalized.demographics.gender === "male" ? 0 : normalized.demographics.gender === "female" ? 1 : "",
     age: demographics.age ?? "",
-    dx: demographics.dx || "",
+    dx: normalized.demographics.dx === "yes" ? 1 : normalized.demographics.dx === "no" ? 0 : "",
 
     phq4_anxiety_sum: takeSum(phq4.values, [1, 2]),
     phq4_depression_sum: takeSum(phq4.values, [3, 4]),
@@ -488,30 +477,21 @@ function scoreRow(payload, fileLabel, fileSeq) {
     bfi_openness_mean: round4(takeMean(m3Scored, [5, 10, 15])),
 
     phq4_missing: phq4.missing,
-    m1_missing: m1.missing,
-    m2_missing: m2.missing,
-    m3_missing: m3.missing,
+    opd_missing: m1.missing,
+    sifs_missing: m2.missing,
+    bfi_missing: m3.missing,
   };
 
   for (let i = 1; i <= PHQ4_COUNT; i++) row[`phq4_${i}_raw`] = phq4.values[i];
-  for (let i = 1; i <= M1_COUNT; i++) row[`m1_${i}_raw`] = m1.values[i];
-  for (let i = 1; i <= M2_COUNT; i++) row[`m2_${i}_raw`] = m2.values[i];
-  for (let i = 1; i <= M3_COUNT; i++) row[`m3_${i}_raw`] = m3.values[i];
-
-  row.m2_1_keyed = m2Scored[1];
-  row.m2_6_keyed = m2Scored[6];
-  row.m2_8_keyed = m2Scored[8];
-  row.m2_12_keyed = m2Scored[12];
-  row.m2_17_keyed = m2Scored[17];
-  row.m2_19_keyed = m2Scored[19];
-  row.m2_24_keyed = m2Scored[24];
-
-  row.m3_1_keyed = m3Scored[1];
-  row.m3_3_keyed = m3Scored[3];
-  row.m3_7_keyed = m3Scored[7];
-  row.m3_8_keyed = m3Scored[8];
-  row.m3_10_keyed = m3Scored[10];
-  row.m3_14_keyed = m3Scored[14];
+  for (let i = 1; i <= M1_COUNT; i++) row[`opd_${i}_raw`] = m1.values[i];
+  for (let i = 1; i <= M2_COUNT; i++) {
+    row[`sifs_${i}_raw`] = m2.values[i];
+    row[`sifs_${i}_keyed`] = m2Scored[i];
+  }
+  for (let i = 1; i <= M3_COUNT; i++) {
+    row[`bfi_${i}_raw`] = m3.values[i];
+    row[`bfi_${i}_keyed`] = m3Scored[i];
+  }
 
   return row;
 }
@@ -667,6 +647,10 @@ export default {
         },
         500
       );
+    }
+  },
+};
+
     }
   },
 };
