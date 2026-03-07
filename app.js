@@ -4,6 +4,7 @@ const SUBMIT_ENDPOINT = "https://opd-osf-submit.golubmoskva.workers.dev/submit";
 
 const form = document.getElementById("surveyForm");
 const screenRoot = document.getElementById("screenRoot");
+const topHeader = document.querySelector(".top");
 
 const navRow = document.getElementById("navRow");
 const prevBtn = document.getElementById("prevBtn");
@@ -457,7 +458,7 @@ function goPrev() {
 
 function renderIntro() {
   screenRoot.innerHTML = `
-    <article class="screen-card">
+    <article class="screen-card screen-card--soft-violet">
       <div class="intro-copy">
         <h1 class="intro-title">Рада вас видеть!</h1>
 
@@ -576,7 +577,7 @@ function renderDemographics() {
 function renderInstrumentIntro(screen) {
   const instrument = instruments[screen.instrumentId];
   screenRoot.innerHTML = `
-    <article class="screen-card">
+    <article class="screen-card screen-card--soft-violet">
       <h2>${instrument.title}</h2>
       <p class="lead">${instrument.intro}</p>
     </article>
@@ -647,7 +648,7 @@ function renderSubmit() {
     : "";
 
   screenRoot.innerHTML = `
-    <article class="screen-card">
+    <article class="screen-card screen-card--soft-violet">
       <h2>Завершение</h2>
       <p class="lead">Ура! Нажмите «Отправить» для завершения исследования. Пожалуйста, дождитесь появления окна о том, что ваши ответы отправлены.</p>
       ${successHtml}
@@ -813,6 +814,7 @@ function updateNavState() {
 
 function render() {
   const screen = getCurrentScreen();
+  topHeader.hidden = screen.type === "question";
 
   if (screen.type === "intro") {
     renderIntro();
