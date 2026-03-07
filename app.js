@@ -8,6 +8,7 @@ const screenRoot = document.getElementById("screenRoot");
 const navRow = document.getElementById("navRow");
 const prevBtn = document.getElementById("prevBtn");
 const nextBtn = document.getElementById("nextBtn");
+const resultBtn = document.getElementById("resultBtn");
 const submitBtn = document.getElementById("submitBtn");
 
 const phq4Scale = [
@@ -139,6 +140,9 @@ const instruments = {
   },
 };
 
+const M2_REVERSE = new Set([1, 6, 8, 12, 17, 19, 24]);
+const M3_REVERSE = new Set([1, 3, 7, 8, 10, 14]);
+
 function buildScreens() {
   const out = [
     { type: "intro" },
@@ -159,6 +163,7 @@ function buildScreens() {
   });
 
   out.push({ type: "submit" });
+  out.push({ type: "results" });
   return out;
 }
 
@@ -273,6 +278,143 @@ function findFirstMissingQuestionScreenIndex() {
     }
   }
   return -1;
+}
+
+function toValidNumber(value, min, max) {
+  if (typeof value !== "number" || !Number.isFinite(value)) return null;
+  if (value < min || value > max) return null;
+  return value;
+}
+
+function collectScaleValues(instrumentId, count, min, max) {
+  const source = state.responses[instrumentId] || {};
+  const values = {};
+  for (let i = 1; i <= count; i++) {
+    values[i] = toValidNumber(source[`${instrumentId}_${i}`], min, max);
+  }
+  return values;
+}
+
+function scoreWithReverse(values, reverseSet, maxValue) {
+  const scored = {};
+  Object.keys(values).forEach((key) => {
+    const idx = Number(key);
+    const raw = values[idx];
+    if (raw == null) {
+      scored[idx] = null;
+      return;
+    }
+    scored[idx] = reverseSet.has(idx) ? maxValue - raw : raw;
+  });
+  return scored;
+}
+
+function sumOf(values, indices) {
+  let total = 0;
+  let hasAny = false;
+  indices.forEach((idx) => {
+    const val = values[idx];
+    if (typeof val === "number") {
+      total += val;
+      hasAny = true;
+    }
+  });
+  return hasAny ? total : null;
+}
+
+function meanOf(values, indices) {
+  let total = 0;
+  let n = 0;
+  indices.forEach((idx) => {
+    const val = values[idx];
+    if (typeof val === "number") {
+      total += val;
+      n += 1;
+    }
+  });
+  return n ? total / n : null;
+}
+
+function fmt(value) {
+  return typeof value === "number" ? value.toFixed(2) : "—";
+}
+
+function pct(value, min, max) {
+  if (typeof value !== "number") return 0;
+  const clamped = Math.min(max, Math.max(min, value));
+  return ((clamped - min) / (max - min)) * 100;
+}
+
+function bfiBand(value) {
+  if (value == null) return "Нет данных для интерпретации.";
+  if (value <= 2.1) return "ниже среднего";
+  if (value >= 3.9) return "выше среднего";
+  return "среднее";
+}
+
+function sifsSeverity(value) {
+  if (value == null) return "Нет данных для интерпретации.";
+  if (value < 1.3) return "минимальная выраженность личностной дисфункции";
+  if (value < 1.9) return "лёгкая выраженность личностной дисфункции";
+  if (value < 2.5) return "умеренная выраженность личностной дисфункции";
+  return "высокая выраженность личностной дисфункции";
+}
+
+function buildResultsModel() {
+  const phq = collectScaleValues("phq4", 4, 0, 3);
+  const m1 = collectScaleValues("m1", 12, 0, 4);
+  const m2Raw = collectScaleValues("m2", 24, 0, 4);
+  const m3Raw = collectScaleValues("m3", 15, 1, 5);
+
+  const m2 = scoreWithReverse(m2Raw, M2_REVERSE, 4);
+  const m3 = scoreWithReverse(m3Raw, M3_REVERSE, 6);
+
+  const phqAnxiety = sumOf(phq, [1, 2]);
+  const phqDepression = sumOf(phq, [3, 4]);
+  const phqTotal = sumOf(phq, [1, 2, 3, 4]);
+
+  const opdTotalMean = meanOf(m1, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
+
+  const sifsIdentity = meanOf(m2, [1, 2, 3, 4, 5, 6, 7]);
+  const sifsSelfDirection = meanOf(m2, [8, 9, 10, 11, 12]);
+  const sifsEmpathy = meanOf(m2, [13, 14, 15, 16, 17, 18]);
+  const sifsIntimacy = meanOf(m2, [19, 20, 21, 22, 23, 24]);
+  const sifsTotal = meanOf(m2, Array.from({ length: 24 }, (_, i) => i + 1));
+
+  const bfiExtraversion = meanOf(m3, [1, 6, 11]);
+  const bfiAgreeableness = meanOf(m3, [2, 7, 12]);
+  const bfiConscientiousness = meanOf(m3, [3, 8, 13]);
+  const bfiNegativeEmotionality = meanOf(m3, [4, 9, 14]);
+  const bfiOpenness = meanOf(m3, [5, 10, 15]);
+
+  return {
+    phqAnxiety,
+    phqDepression,
+    phqTotal,
+    opdTotalMean,
+    sifsIdentity,
+    sifsSelfDirection,
+    sifsEmpathy,
+    sifsIntimacy,
+    sifsTotal,
+    bfiExtraversion,
+    bfiAgreeableness,
+    bfiConscientiousness,
+    bfiNegativeEmotionality,
+    bfiOpenness,
+  };
+}
+
+function renderBarRow(label, value, min, max, fillClass = "") {
+  return `
+    <div class="result-row">
+      <div class="result-row__label">${label}</div>
+      <div class="result-row__bar">
+        <div class="result-row__fill ${fillClass}" style="width:${pct(value, min, max)}%"></div>
+      </div>
+      <div class="result-row__value">${fmt(value)}</div>
+    </div>
+  `;
 }
 
 function goTo(index) {
@@ -493,16 +635,68 @@ function renderSubmit() {
   `;
 }
 
+function renderResults() {
+  const r = buildResultsModel();
+
+  screenRoot.innerHTML = `
+    <article class="screen-card results-screen">
+      <h2>Результаты</h2>
+
+      <section class="result-block">
+        <h3 class="result-block__title">PHQ-4</h3>
+        ${renderBarRow("Тревога", r.phqAnxiety, 0, 6)}
+        ${renderBarRow("Депрессия", r.phqDepression, 0, 6)}
+        <p class="result-note">Тревога и депрессия считаются клинически значимыми при значениях <strong>≥ 3</strong>.</p>
+      </section>
+
+      <section class="result-block">
+        <h3 class="result-block__title">OPD-SQS</h3>
+        ${renderBarRow("Общий балл", r.opdTotalMean, 0, 4, "fill-opd")}
+      </section>
+
+      <section class="result-block">
+        <h3 class="result-block__title">SIFS</h3>
+        ${renderBarRow("Индекс тяжести", r.sifsTotal, 0, 4, "fill-sifs")}
+        ${renderBarRow("Самосознание", r.sifsIdentity, 0, 4, "fill-sifs")}
+        ${renderBarRow("Самонаправленность", r.sifsSelfDirection, 0, 4, "fill-sifs")}
+        ${renderBarRow("Эмпатия", r.sifsEmpathy, 0, 4, "fill-sifs-light")}
+        ${renderBarRow("Потребность в доверительных отношениях", r.sifsIntimacy, 0, 4, "fill-sifs")}
+        <p class="result-note">Интерпретация общего индекса: <strong>${sifsSeverity(r.sifsTotal)}</strong>.</p>
+      </section>
+
+      <section class="result-block">
+        <h3 class="result-block__title">BFI-2-XS</h3>
+        ${renderBarRow("Экстраверсия", r.bfiExtraversion, 1, 5, "fill-bfi")}
+        ${renderBarRow("Доброжелательность", r.bfiAgreeableness, 1, 5, "fill-bfi")}
+        ${renderBarRow("Добросовестность", r.bfiConscientiousness, 1, 5, "fill-bfi")}
+        ${renderBarRow("Негативная эмоциональность", r.bfiNegativeEmotionality, 1, 5, "fill-bfi")}
+        ${renderBarRow("Открытость опыту", r.bfiOpenness, 1, 5, "fill-bfi")}
+
+        <div class="result-interpretation">
+          <h4>Содержательная интерпретация</h4>
+          <p><strong>Экстраверсия (${bfiBand(r.bfiExtraversion)}):</strong> при более высоких значениях чаще проявляются общительность, энергичность и выраженная социальная активность; при более низких — сдержанность, ориентация на узкий круг контактов и предпочтение спокойного режима общения.</p>
+          <p><strong>Доброжелательность (${bfiBand(r.bfiAgreeableness)}):</strong> более высокие значения обычно связаны с кооперативностью, доверием и эмпатией; более низкие — с прямолинейностью, конкурентностью и критичностью в социальных взаимодействиях.</p>
+          <p><strong>Добросовестность (${bfiBand(r.bfiConscientiousness)}):</strong> высокие баллы связаны с организованностью, самодисциплиной и целеустремлённостью; низкие — со спонтанностью, трудностями в планировании и меньшей устойчивостью к рутинным задачам.</p>
+          <p><strong>Негативная эмоциональность (${bfiBand(r.bfiNegativeEmotionality)}):</strong> более высокие значения указывают на большую эмоциональную чувствительность и реактивность на стресс; более низкие — на эмоциональную устойчивость и более быстрое восстановление после напряжённых событий.</p>
+          <p><strong>Открытость опыту (${bfiBand(r.bfiOpenness)}):</strong> высокие баллы чаще отражают интерес к новому, абстрактному мышлению и творческим занятиям; низкие — ориентацию на практичность, предсказуемость и проверенные способы действия.</p>
+        </div>
+      </section>
+    </article>
+  `;
+}
+
 function updateNavState() {
   const screen = getCurrentScreen();
   const isQuestion = screen.type === "question";
   const isSubmit = screen.type === "submit";
+  const isResults = screen.type === "results";
 
   navRow.hidden = isQuestion;
 
   if (isQuestion) {
     nextBtn.hidden = true;
     prevBtn.hidden = true;
+    resultBtn.hidden = true;
     submitBtn.hidden = true;
     return;
   }
@@ -512,12 +706,22 @@ function updateNavState() {
 
   if (isSubmit) {
     nextBtn.hidden = true;
+    resultBtn.hidden = !state.submitted;
+    resultBtn.disabled = !state.submitted || state.submitting;
     submitBtn.hidden = false;
     submitBtn.disabled = state.submitting || state.submitted;
     return;
   }
 
+  if (isResults) {
+    nextBtn.hidden = true;
+    submitBtn.hidden = true;
+    resultBtn.hidden = true;
+    return;
+  }
+
   submitBtn.hidden = true;
+  resultBtn.hidden = true;
   nextBtn.hidden = false;
   nextBtn.disabled = !canProceed(screen) || state.submitting;
 
@@ -541,6 +745,8 @@ function render() {
     renderQuestion(screen);
   } else if (screen.type === "submit") {
     renderSubmit();
+  } else if (screen.type === "results") {
+    renderResults();
   }
 
   updateNavState();
@@ -606,6 +812,12 @@ async function handleSubmit(e) {
 
 prevBtn.addEventListener("click", goPrev);
 nextBtn.addEventListener("click", handleNextClick);
+resultBtn.addEventListener("click", () => {
+  const screen = getCurrentScreen();
+  if (screen.type === "submit" && state.submitted) {
+    goNext();
+  }
+});
 form.addEventListener("submit", handleSubmit);
 
 render();
