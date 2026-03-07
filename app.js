@@ -2,28 +2,53 @@
 const SUBMIT_ENDPOINT = "https://opd-osf-submit.golubmoskva.workers.dev/submit";
 // ====================
 
-const steps = Array.from(document.querySelectorAll(".step"));
 const form = document.getElementById("surveyForm");
+const screenRoot = document.getElementById("screenRoot");
 
+const navRow = document.getElementById("navRow");
 const prevBtn = document.getElementById("prevBtn");
 const nextBtn = document.getElementById("nextBtn");
 const submitBtn = document.getElementById("submitBtn");
 
-const stepTitle = document.getElementById("stepTitle");
-const progressBar = document.getElementById("progressBar");
-
 const submitError = document.getElementById("submitError");
 const submitOk = document.getElementById("submitOk");
 
-let currentStep = 0;
+const phq4Scale = [
+  { value: 0, label: "Совсем нет" },
+  { value: 1, label: "В течение нескольких дней" },
+  { value: 2, label: "Более, чем половину этого времени" },
+  { value: 3, label: "Почти каждый день" },
+];
 
-// ---------- Questions data ----------
 const m1Scale = [
   { value: 0, label: "Полностью не согласен" },
   { value: 1, label: "Скорее не согласен" },
   { value: 2, label: "Ни согласен, ни не согласен" },
   { value: 3, label: "Скорее согласен" },
   { value: 4, label: "Полностью согласен" },
+];
+
+const m2Scale = [
+  { value: 0, label: "Утверждение совсем не описывает меня" },
+  { value: 1, label: "Утверждение едва описывает меня" },
+  { value: 2, label: "Утверждение умеренно описывает меня" },
+  { value: 3, label: "Утверждение во многом описывает меня" },
+  { value: 4, label: "Утверждение полностью описывает меня" },
+];
+
+const m3Scale = [
+  { value: 1, label: "Совершенно не согласен" },
+  { value: 2, label: "Немного не согласен" },
+  { value: 3, label: "Нейтрально, нет мнения" },
+  { value: 4, label: "Немного согласен" },
+  { value: 5, label: "Совершенно согласен" },
+];
+
+const phq4Questions = [
+  "Чувство тревоги или раздражения.",
+  "Неспособность справиться со своим беспокойством.",
+  "Снижение интереса и удовольствия от привычных дел.",
+  "Чувство подавленности или безнадежности.",
 ];
 
 const m1Questions = [
@@ -39,14 +64,6 @@ const m1Questions = [
   "Мне трудно устанавливать контакт с другими людьми.",
   "У меня невысокая самооценка.",
   "Мой опыт таков: если слишком доверять людям, можно получить неожиданные неприятности.",
-];
-
-const m2Scale = [
-  { value: 0, label: "Утверждение совсем не описывает меня" },
-  { value: 1, label: "Утверждение едва описывает меня" },
-  { value: 2, label: "Утверждение умеренно описывает меня" },
-  { value: 3, label: "Утверждение во многом описывает меня" },
-  { value: 4, label: "Утверждение полностью описывает меня" },
 ];
 
 const m2Questions = [
@@ -76,14 +93,6 @@ const m2Questions = [
   "В моей жизни есть много людей, с которыми я близок и поддерживаю отношения, основанные на уважении, привязанности и взаимной поддержке.",
 ];
 
-const m3Scale = [
-  { value: 1, label: "Совершенно не согласен" },
-  { value: 2, label: "Немного не согласен" },
-  { value: 3, label: "Нейтрально, нет мнения" },
-  { value: 4, label: "Немного согласен" },
-  { value: 5, label: "Совершенно согласен" },
-];
-
 const m3Questions = [
   "Я – человек, который... склонный быть молчаливым.",
   "…сопереживающий и добросердечный.",
@@ -102,192 +111,455 @@ const m3Questions = [
   "…генерирующий новые идеи, оригинально мыслящий.",
 ];
 
-// ---------- Render questions ----------
-function renderQuestions(containerId, prefix, questions, scale) {
-  const root = document.getElementById(containerId);
-  if (!root) return;
+const instruments = {
+  phq4: {
+    title: "PHQ-4",
+    intro:
+      "Вам будут предложены 4 утверждения о вашем состоянии за последние две недели. Отвечайте, насколько часто вы это ощущали.",
+    questions: phq4Questions,
+    scale: phq4Scale,
+  },
+  m1: {
+    title: "OPD-SQS",
+    intro:
+      "На следующих экранах вы увидите утверждения, описывающие особенности человека и отношений. Выберите вариант, который лучше всего описывает вас.",
+    questions: m1Questions,
+    scale: m1Scale,
+  },
+  m2: {
+    title: "SIFS",
+    intro:
+      "Оцените, насколько каждое утверждение о вас и ваших взаимоотношениях с другими людьми соответствует вашему опыту.",
+    questions: m2Questions,
+    scale: m2Scale,
+  },
+  m3: {
+    title: "BFI-2-XS",
+    intro:
+      "Ниже будут утверждения о личностных качествах. Выберите степень согласия для каждого пункта.",
+    questions: m3Questions,
+    scale: m3Scale,
+  },
+};
 
-  root.innerHTML = "";
-  questions.forEach((qText, idx) => {
-    const qNum = idx + 1;
-    const name = `${prefix}_${qNum}`;
+function buildScreens() {
+  const out = [
+    { type: "intro" },
+    { type: "demographics" },
+  ];
 
-    const card = document.createElement("div");
-    card.className = "q";
-
-    const t = document.createElement("div");
-    t.className = "qtext";
-    t.textContent = `${qNum}. ${qText}`;
-
-    const opts = document.createElement("div");
-    opts.className = "opts";
-
-    scale.forEach((opt) => {
-      const lab = document.createElement("label");
-      const input = document.createElement("input");
-      input.type = "radio";
-      input.name = name;
-      input.value = String(opt.value);
-      input.required = true;
-      lab.appendChild(input);
-      lab.appendChild(document.createTextNode(" " + opt.label));
-      opts.appendChild(lab);
+  ["phq4", "m1", "m2", "m3"].forEach((instrumentId) => {
+    out.push({ type: "instrument_intro", instrumentId });
+    instruments[instrumentId].questions.forEach((_, idx) => {
+      out.push({
+        type: "question",
+        instrumentId,
+        questionIndex: idx + 1,
+        total: instruments[instrumentId].questions.length,
+        responseKey: `${instrumentId}_${idx + 1}`,
+      });
     });
-
-    card.appendChild(t);
-    card.appendChild(opts);
-    root.appendChild(card);
   });
+
+  out.push({ type: "submit" });
+  return out;
 }
 
-renderQuestions("m1Questions", "m1", m1Questions, m1Scale);
-renderQuestions("m2Questions", "m2", m2Questions, m2Scale);
-renderQuestions("m3Questions", "m3", m3Questions, m3Scale);
+const screens = buildScreens();
 
-// ---------- Validation + steps ----------
-function isOptionalStep(stepIndex) {
-  return stepIndex === 2; // доходы/трудоустройство
+const state = {
+  currentScreenIndex: 0,
+  submitting: false,
+  submitted: false,
+  autoAdvancing: false,
+  consent: {
+    age18: false,
+    pdn: false,
+  },
+  demographics: {
+    gender: "",
+    user_label: "",
+    age: "",
+    dx: "",
+  },
+  responses: {
+    phq4: {},
+    m1: {},
+    m2: {},
+    m3: {},
+  },
+};
+
+function getCurrentScreen() {
+  return screens[state.currentScreenIndex];
 }
 
-function validateAgeStrict() {
-  const ageEl = form?.elements?.["age"];
-  if (!ageEl) return true;
-  const v = String(ageEl.value || "").trim();
-  return /^\d{1,2}$/.test(v);
-}
-
-function validateCurrentStep(showMessages = false) {
-  if (isOptionalStep(currentStep)) return true;
-
-  const stepEl = steps[currentStep];
-  const inputs = Array.from(stepEl.querySelectorAll("input"));
-
-  for (const inp of inputs) {
-    if (!inp.checkValidity()) {
-      if (showMessages) inp.reportValidity();
-      return false;
-    }
-  }
-
-  if (currentStep === 1 && !validateAgeStrict()) {
-    if (showMessages) alert("Возраст должен быть числом (1–2 цифры).");
-    return false;
-  }
-
-  return true;
-}
-
-function updateNextButtonState() {
-  if (!nextBtn) return;
-
-  if (isOptionalStep(currentStep)) {
-    nextBtn.disabled = false;
-    return;
-  }
-
-  const ok = validateCurrentStep(false);
-  nextBtn.disabled = !ok;
-
-  // диагностика: можно убрать потом
-  console.log("step", currentStep, "valid =", ok, {
-    gender: form?.elements?.["gender"]?.value,
-    age: form?.elements?.["age"]?.value,
-    dx: form?.elements?.["dx"]?.value,
-    ageValid: validateAgeStrict(),
-  });
-}
-
-function showStep(n) {
-  steps.forEach((s, i) => (s.hidden = i !== n));
-  currentStep = n;
-
-  if (prevBtn) prevBtn.hidden = n === 0;
-  if (nextBtn) nextBtn.hidden = n === steps.length - 1;
-  if (submitBtn) submitBtn.hidden = n !== steps.length - 1;
-
-  if (stepTitle) stepTitle.textContent = `Страница ${n + 1} из ${steps.length}`;
-  if (progressBar) progressBar.style.width = `${(n / (steps.length - 1)) * 100}%`;
-
-  if (submitError) submitError.hidden = true;
-  if (submitOk) submitOk.hidden = true;
-
-  updateNextButtonState();
-  window.scrollTo({ top: 0, behavior: "smooth" });
-}
-
-// ВАЖНО: change для radio
-form.addEventListener("input", updateNextButtonState);
-form.addEventListener("change", updateNextButtonState);
-
-prevBtn.addEventListener("click", () => showStep(Math.max(0, currentStep - 1)));
-nextBtn.addEventListener("click", () => {
-  if (!validateCurrentStep(true)) return;
-  showStep(Math.min(steps.length - 1, currentStep + 1));
-});
-
-// ---------- Submit ----------
 function uuidv4() {
-  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, c => {
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
     const r = crypto.getRandomValues(new Uint8Array(1))[0] & 15;
     const v = c === "x" ? r : (r & 0x3) | 0x8;
     return v.toString(16);
   });
 }
 
-function extractScale(prefix, n) {
-  const out = {};
-  for (let i = 1; i <= n; i++) {
-    out[`${prefix}_${i}`] = Number(form.elements[`${prefix}_${i}`].value);
+function validAge(ageStr) {
+  return /^\d{1,2}$/.test(String(ageStr || "").trim());
+}
+
+function canProceed(screen) {
+  if (screen.type === "intro") {
+    return state.consent.age18 && state.consent.pdn;
   }
+
+  if (screen.type === "demographics") {
+    return (
+      !!state.demographics.gender &&
+      !!state.demographics.dx &&
+      !!String(state.demographics.user_label || "").trim() &&
+      validAge(state.demographics.age)
+    );
+  }
+
+  if (screen.type === "instrument_intro") {
+    return true;
+  }
+
+  return true;
+}
+
+function buildScalePayload(instrumentId) {
+  const questions = instruments[instrumentId].questions;
+  const out = {};
+
+  for (let i = 1; i <= questions.length; i++) {
+    const key = `${instrumentId}_${i}`;
+    const value = state.responses[instrumentId][key];
+    out[key] = typeof value === "number" ? value : null;
+  }
+
   return out;
 }
 
-function getRadioValue(name) {
-  const el = form?.elements?.[name];
-  if (!el) return null;
-  return el.value === "" ? null : el.value;
-}
-
-form.addEventListener("submit", async (e) => {
-  e.preventDefault();
-  if (!validateCurrentStep(true)) return;
-
-  const respondent_id = uuidv4();
-  const employment = getRadioValue("employment");
-  const income = getRadioValue("income");
-  const user_label = String(form.elements["user_label"]?.value || "").trim();
-
-  const payload = {
-    schema_version: "1.3",
-    respondent_id,
-    user_label,
+function buildPayload() {
+  return {
+    schema_version: "2.0",
+    respondent_id: uuidv4(),
+    user_label: String(state.demographics.user_label || "").trim(),
     submitted_at: new Date().toISOString(),
     consent: {
-      age18: !!form.elements["age18"]?.checked,
-      pdn: !!form.elements["consent"]?.checked,
+      age18: !!state.consent.age18,
+      pdn: !!state.consent.pdn,
     },
     demographics: {
-      gender: getRadioValue("gender"),
-      age: Number(String(form.elements["age"]?.value || "").trim()),
-      dx: getRadioValue("dx"),
-    },
-    socioeconomic: {
-      employment,
-      income,
-      // Backward-compatible aliases for older worker schema.
-      employed: employment,
-      income_personal: income,
-      income_family: income,
+      gender: state.demographics.gender,
+      age: Number(String(state.demographics.age || "").trim()),
+      dx: state.demographics.dx,
     },
     responses: {
-      m1: extractScale("m1", m1Questions.length),
-      m2: extractScale("m2", m2Questions.length),
-      m3: extractScale("m3", m3Questions.length),
+      phq4: buildScalePayload("phq4"),
+      m1: buildScalePayload("m1"),
+      m2: buildScalePayload("m2"),
+      m3: buildScalePayload("m3"),
     },
   };
+}
+
+function findFirstMissingQuestionScreenIndex() {
+  for (let i = 0; i < screens.length; i++) {
+    const screen = screens[i];
+    if (screen.type !== "question") continue;
+
+    const value = state.responses[screen.instrumentId][screen.responseKey];
+    if (typeof value !== "number") {
+      return i;
+    }
+  }
+  return -1;
+}
+
+function clearMessages() {
+  submitError.hidden = true;
+  if (!state.submitted) {
+    submitOk.hidden = true;
+  }
+}
+
+function goTo(index) {
+  if (index < 0 || index >= screens.length) return;
+  state.currentScreenIndex = index;
+  state.autoAdvancing = false;
+  clearMessages();
+  render();
+}
+
+function goNext() {
+  if (state.currentScreenIndex >= screens.length - 1) return;
+  goTo(state.currentScreenIndex + 1);
+}
+
+function goPrev() {
+  if (state.currentScreenIndex <= 0) return;
+  goTo(state.currentScreenIndex - 1);
+}
+
+function renderIntro() {
+  screenRoot.innerHTML = `
+    <article class="screen-card">
+      <h2>Привет!</h2>
+      <p class="lead">Это короткое исследование о самовосприятии, эмоциональном состоянии и личностных особенностях.</p>
+      <div class="checks">
+        <label class="check-item">
+          <input type="checkbox" id="consentAge" ${state.consent.age18 ? "checked" : ""}>
+          <span>Мне есть 18 лет.</span>
+        </label>
+        <label class="check-item">
+          <input type="checkbox" id="consentPdn" ${state.consent.pdn ? "checked" : ""}>
+          <span>Я даю согласие на участие в исследовании.</span>
+        </label>
+      </div>
+    </article>
+  `;
+
+  const ageEl = document.getElementById("consentAge");
+  const pdnEl = document.getElementById("consentPdn");
+
+  ageEl.addEventListener("change", () => {
+    state.consent.age18 = ageEl.checked;
+    updateNavState();
+  });
+
+  pdnEl.addEventListener("change", () => {
+    state.consent.pdn = pdnEl.checked;
+    updateNavState();
+  });
+}
+
+function renderDemographics() {
+  screenRoot.innerHTML = `
+    <article class="screen-card">
+      <h2>Общие вопросы</h2>
+
+      <label class="field">
+        <span>Пол</span>
+        <div class="choices">
+          <label><input type="radio" name="gender" value="male" ${state.demographics.gender === "male" ? "checked" : ""}> Мужской</label>
+          <label><input type="radio" name="gender" value="female" ${state.demographics.gender === "female" ? "checked" : ""}> Женский</label>
+        </div>
+      </label>
+
+      <label class="field">
+        <span>LABEL</span>
+        <input type="text" id="userLabel" value="${(state.demographics.user_label || "").replace(/"/g, "&quot;")}" placeholder="Фамилия/Имя/ник" autocomplete="off">
+        <small class="hint">Рекомендуется псевдоним/ник, не идентифицирующий личность.</small>
+      </label>
+
+      <label class="field">
+        <span>Возраст</span>
+        <input type="text" id="age" value="${(state.demographics.age || "").replace(/"/g, "&quot;")}" inputmode="numeric" placeholder="Например, 27" autocomplete="off">
+        <small class="hint">Только цифры, не более двух знаков.</small>
+      </label>
+
+      <label class="field">
+        <span>Есть ли диагностированные психические заболевания?</span>
+        <div class="choices">
+          <label><input type="radio" name="dx" value="yes" ${state.demographics.dx === "yes" ? "checked" : ""}> Да</label>
+          <label><input type="radio" name="dx" value="no" ${state.demographics.dx === "no" ? "checked" : ""}> Нет</label>
+        </div>
+      </label>
+    </article>
+  `;
+
+  screenRoot.querySelectorAll('input[name="gender"]').forEach((el) => {
+    el.addEventListener("change", () => {
+      state.demographics.gender = el.value;
+      updateNavState();
+    });
+  });
+
+  screenRoot.querySelectorAll('input[name="dx"]').forEach((el) => {
+    el.addEventListener("change", () => {
+      state.demographics.dx = el.value;
+      updateNavState();
+    });
+  });
+
+  const userLabelEl = document.getElementById("userLabel");
+  userLabelEl.addEventListener("input", () => {
+    state.demographics.user_label = userLabelEl.value;
+    updateNavState();
+  });
+
+  const ageEl = document.getElementById("age");
+  ageEl.addEventListener("input", () => {
+    state.demographics.age = ageEl.value;
+    updateNavState();
+  });
+}
+
+function renderInstrumentIntro(screen) {
+  const instrument = instruments[screen.instrumentId];
+  screenRoot.innerHTML = `
+    <article class="screen-card">
+      <h2>${instrument.title}</h2>
+      <p class="lead">${instrument.intro}</p>
+    </article>
+  `;
+}
+
+function renderQuestion(screen) {
+  const instrument = instruments[screen.instrumentId];
+  const selected = state.responses[screen.instrumentId][screen.responseKey];
+  const percent = Math.round((screen.questionIndex / screen.total) * 100);
+
+  const answers = instrument.scale
+    .map((opt) => {
+      const selectedClass = selected === opt.value ? "is-selected" : "";
+      const disabledAttr = state.autoAdvancing ? "disabled" : "";
+      return `
+        <button type="button" class="answer-card ${selectedClass}" data-value="${opt.value}" ${disabledAttr}>
+          <span class="answer-label">${opt.label}</span>
+        </button>
+      `;
+    })
+    .join("");
+
+  screenRoot.innerHTML = `
+    <article class="question-screen">
+      <div class="question-top">
+        <button type="button" id="questionBackBtn" class="inline-back">Назад</button>
+        <div class="local-progress">
+          <div class="local-progress__text">Вопрос ${screen.questionIndex} из ${screen.total} (${percent}%)</div>
+          <div class="local-progress__track"><div class="local-progress__bar" style="width:${percent}%"></div></div>
+        </div>
+      </div>
+
+      <div class="question-card">
+        ${instrument.questions[screen.questionIndex - 1]}
+      </div>
+
+      <div class="answer-list">
+        ${answers}
+      </div>
+    </article>
+  `;
+
+  document.getElementById("questionBackBtn").addEventListener("click", goPrev);
+
+  screenRoot.querySelectorAll(".answer-card").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      if (state.autoAdvancing) return;
+
+      const value = Number(btn.dataset.value);
+      state.responses[screen.instrumentId][screen.responseKey] = value;
+
+      state.autoAdvancing = true;
+      render();
+
+      setTimeout(() => {
+        state.autoAdvancing = false;
+        goNext();
+      }, 120);
+    });
+  });
+}
+
+function renderSubmit() {
+  screenRoot.innerHTML = `
+    <article class="screen-card">
+      <h2>Завершение</h2>
+      <p class="lead">Проверьте ответы и нажмите «Отправить» для завершения исследования.</p>
+    </article>
+  `;
+}
+
+function updateNavState() {
+  const screen = getCurrentScreen();
+  const isQuestion = screen.type === "question";
+  const isSubmit = screen.type === "submit";
+
+  navRow.hidden = isQuestion;
+
+  if (isQuestion) {
+    nextBtn.hidden = true;
+    prevBtn.hidden = true;
+    submitBtn.hidden = true;
+    return;
+  }
+
+  prevBtn.hidden = state.currentScreenIndex === 0;
+  prevBtn.disabled = state.submitting;
+
+  if (isSubmit) {
+    nextBtn.hidden = true;
+    submitBtn.hidden = false;
+    submitBtn.disabled = state.submitting;
+    return;
+  }
+
+  submitBtn.hidden = true;
+  nextBtn.hidden = false;
+  nextBtn.disabled = !canProceed(screen) || state.submitting;
+
+  if (screen.type === "intro" || screen.type === "instrument_intro") {
+    nextBtn.textContent = "Начать";
+  } else {
+    nextBtn.textContent = "Далее";
+  }
+}
+
+function render() {
+  const screen = getCurrentScreen();
+
+  clearMessages();
+
+  if (screen.type === "intro") {
+    renderIntro();
+  } else if (screen.type === "demographics") {
+    renderDemographics();
+  } else if (screen.type === "instrument_intro") {
+    renderInstrumentIntro(screen);
+  } else if (screen.type === "question") {
+    renderQuestion(screen);
+  } else if (screen.type === "submit") {
+    renderSubmit();
+  }
+
+  updateNavState();
+
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function handleNextClick() {
+  const screen = getCurrentScreen();
+  if (!canProceed(screen)) {
+    if (screen.type === "demographics" && !validAge(state.demographics.age)) {
+      alert("Возраст должен быть числом (1–2 цифры).");
+    }
+    return;
+  }
+  goNext();
+}
+
+async function handleSubmit(e) {
+  e.preventDefault();
+
+  const screen = getCurrentScreen();
+  if (screen.type !== "submit") return;
+
+  const firstMissing = findFirstMissingQuestionScreenIndex();
+  if (firstMissing >= 0) {
+    submitError.textContent = "Пожалуйста, ответьте на все вопросы перед отправкой.";
+    submitError.hidden = false;
+    goTo(firstMissing);
+    return;
+  }
 
   try {
-    submitBtn.disabled = true;
+    state.submitting = true;
+    state.submitted = false;
+    updateNavState();
+
+    const payload = buildPayload();
 
     const res = await fetch(SUBMIT_ENDPOINT, {
       method: "POST",
@@ -300,13 +572,23 @@ form.addEventListener("submit", async (e) => {
       throw new Error(`Ошибка отправки: ${res.status} ${text}`);
     }
 
+    state.submitted = true;
     submitOk.hidden = false;
   } catch (err) {
     submitError.textContent = err?.message || String(err);
     submitError.hidden = false;
-    submitBtn.disabled = false;
+  } finally {
+    state.submitting = false;
+    updateNavState();
   }
-});
+}
+
+prevBtn.addEventListener("click", goPrev);
+nextBtn.addEventListener("click", handleNextClick);
+form.addEventListener("submit", handleSubmit);
+
+render();
+
 
 // start
 showStep(0);
