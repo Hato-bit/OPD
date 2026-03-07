@@ -207,7 +207,10 @@ function uuidv4() {
 }
 
 function validAge(ageStr) {
-  return /^\d{1,2}$/.test(String(ageStr || "").trim());
+  const ageRaw = String(ageStr || "").trim();
+  if (!/^\d{1,2}$/.test(ageRaw)) return false;
+  const ageNum = Number(ageRaw);
+  return ageNum >= 18 && ageNum <= 99;
 }
 
 function canProceed(screen) {
@@ -857,7 +860,7 @@ function handleNextClick() {
   const screen = getCurrentScreen();
   if (!canProceed(screen)) {
     if (screen.type === "demographics" && !validAge(state.demographics.age)) {
-      alert("Возраст должен быть числом (1–2 цифры).");
+      alert("Возраст должен быть числом от 18 до 99.");
     }
     return;
   }

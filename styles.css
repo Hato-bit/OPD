@@ -69,7 +69,8 @@ h6 {
 }
 
 .question-screen {
-  border-color: #e1ccfc;
+  border-color: #773e8c;
+  border-width: 1.5px;
 }
 
 .screen-card--soft-violet {
@@ -84,8 +85,8 @@ h6 {
 
 .screen-title-box {
   background: #fff;
-  border-color: #e1ccfc;
-  border-width: 2px;
+  border-color: #773e8c;
+  border-width: 3px;
   min-height: 96px;
   display: flex;
   align-items: center;
@@ -273,7 +274,7 @@ h6 {
   padding: 16px;
   border-radius: 14px;
   background: #fff;
-  border: 1px solid #e1ccfc;
+  border: 1.5px solid #773e8c;
   font-size: clamp(18px, 3.3vw, 24px);
   line-height: 1.4;
   font-weight: 650;
@@ -443,8 +444,8 @@ h6 {
 
 .result-box--title {
   background: #fff;
-  border-color: #e1ccfc;
-  border-width: 2px;
+  border-color: #773e8c;
+  border-width: 3px;
   padding-top: 10px;
   padding-bottom: 10px;
   min-height: 82px;
