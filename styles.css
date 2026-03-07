@@ -85,16 +85,18 @@ h6 {
 .screen-title-box {
   background: #fff;
   border-color: #e1ccfc;
-  min-height: 82px;
+  border-width: 2px;
+  min-height: 96px;
   display: flex;
   align-items: center;
   justify-content: center;
   text-align: center;
 }
 
-.screen-title-box h1,
-.screen-title-box h2 {
-  margin: 0;
+.screen-title-box > h1,
+.screen-title-box > h2 {
+  margin: 0 !important;
+  line-height: 1.1;
   color: #14161a;
   width: 100%;
 }
@@ -442,8 +444,10 @@ h6 {
 .result-box--title {
   background: #fff;
   border-color: #e1ccfc;
+  border-width: 2px;
   padding-top: 10px;
   padding-bottom: 10px;
+  min-height: 82px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -452,6 +456,8 @@ h6 {
 
 .result-box--title .result-block__title {
   width: 100%;
+  margin: 0 !important;
+  line-height: 1.1;
 }
 
 .result-block__title {

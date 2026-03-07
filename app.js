@@ -667,7 +667,7 @@ function renderSubmit() {
         <h2>Завершение</h2>
       </article>
       <article class="screen-card screen-instruction-box screen-instruction-box--center">
-        <p class="lead">Ура! Нажмите «Отправить» для завершения исследования. Пожалуйста, дождитесь появления окна о том, что ваши ответы отправлены.</p>
+        <p class="lead"><strong>Ура!</strong> Нажмите <strong>«Отправить»</strong> для завершения исследования. Пожалуйста, дождитесь появления окна о том, что ваши ответы отправлены.</p>
       </article>
       ${successHtml}
       ${errorHtml}
