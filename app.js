@@ -458,44 +458,50 @@ function goPrev() {
 
 function renderIntro() {
   screenRoot.innerHTML = `
-    <article class="screen-card screen-card--soft-violet">
-      <div class="intro-copy">
+    <div class="screen-section">
+      <article class="screen-card screen-title-box">
         <h1 class="intro-title">Рада вас видеть!</h1>
+      </article>
 
-        <p class="intro-paragraph">
-          Я провожу исследование, посвящённое адаптации Операционализированной психодинамической диагностики (OPD-SQS) и оценке того, насколько корректно и надёжно методика работает на русскоязычной выборке. Для анализа пригодности адаптации OPD-SQS в структуру исследования также включены Шкала личностного и межличностного функционирования (SIFS) и Опросник Большой пятёрки (BFI-2-XS).
-        </p>
+      <article class="screen-card screen-instruction-box">
+        <div class="intro-copy">
+          <p class="intro-paragraph">
+            Я провожу исследование, посвящённое адаптации Операционализированной психодинамической диагностики (OPD-SQS) и оценке того, насколько корректно и надёжно методика работает на русскоязычной выборке. Для анализа пригодности адаптации OPD-SQS в структуру исследования также включены Шкала личностного и межличностного функционирования (SIFS) и Опросник Большой пятёрки (BFI-2-XS).
+          </p>
 
-        <p class="intro-section-title">Что вам предстоит:</p>
-        <ul class="intro-list">
-          <li>ответить на несколько блоков вопросов о вашем опыте;</li>
-          <li>указать базовую социально-демографическую информацию.</li>
-        </ul>
+          <p class="intro-section-title">Что вам предстоит:</p>
+          <ul class="intro-list">
+            <li>ответить на несколько блоков вопросов о вашем опыте;</li>
+            <li>указать базовую социально-демографическую информацию.</li>
+          </ul>
 
-        <p class="intro-paragraph">Обычно заполнение занимает <strong>около 10 минут</strong>.</p>
-        <p class="intro-paragraph">
-          Ответы будут анализироваться <strong>только в обобщённом виде</strong>. Данные хранятся на защищённом частном сервере, вся информация строго конфиденциальна.
-        </p>
-        <p class="intro-paragraph">
-          <strong>Нет “правильных” и “неправильных” ответов.</strong> Пожалуйста, отвечайте честно, важна именно ваша личная оценка.
-        </p>
-        <p class="intro-paragraph">
-          Если у вас есть вопросы об исследовании или обработке данных, вы можете написать:
-          <br><strong>kagolub@edu.hse.ru</strong>
-        </p>
-      </div>
+          <p class="intro-paragraph">Обычно заполнение занимает <strong>около 10 минут</strong>.</p>
+          <p class="intro-paragraph">
+            Ответы будут анализироваться <strong>только в обобщённом виде</strong>. Данные хранятся на защищённом частном сервере, вся информация строго конфиденциальна.
+          </p>
+          <p class="intro-paragraph">
+            <strong>Нет “правильных” и “неправильных” ответов.</strong> Пожалуйста, отвечайте честно, важна именно ваша личная оценка.
+          </p>
+          <p class="intro-paragraph">
+            Если у вас есть вопросы об исследовании или обработке данных, вы можете написать:
+            <br><strong>kagolub@edu.hse.ru</strong>
+          </p>
+        </div>
+      </article>
 
-      <div class="checks">
-        <label class="check-item">
-          <input type="checkbox" id="consentAge" ${state.consent.age18 ? "checked" : ""}>
-          <span>Мне есть 18 лет.</span>
-        </label>
-        <label class="check-item">
-          <input type="checkbox" id="consentPdn" ${state.consent.pdn ? "checked" : ""}>
-          <span>Я даю согласие на участие в исследовании.</span>
-        </label>
-      </div>
-    </article>
+      <article class="screen-card">
+        <div class="checks">
+          <label class="check-item">
+            <input type="checkbox" id="consentAge" ${state.consent.age18 ? "checked" : ""}>
+            <span>Мне есть 18 лет.</span>
+          </label>
+          <label class="check-item">
+            <input type="checkbox" id="consentPdn" ${state.consent.pdn ? "checked" : ""}>
+            <span>Я даю согласие на участие в исследовании.</span>
+          </label>
+        </div>
+      </article>
+    </div>
   `;
 
   const ageEl = document.getElementById("consentAge");
@@ -514,37 +520,41 @@ function renderIntro() {
 
 function renderDemographics() {
   screenRoot.innerHTML = `
-    <article class="screen-card">
-      <h2>Общие вопросы</h2>
+    <div class="screen-section">
+      <article class="screen-card screen-title-box">
+        <h2>Общие вопросы</h2>
+      </article>
 
-      <label class="field">
-        <span>Пол</span>
-        <div class="choices">
-          <label><input type="radio" name="gender" value="male" ${state.demographics.gender === "male" ? "checked" : ""}> Мужской</label>
-          <label><input type="radio" name="gender" value="female" ${state.demographics.gender === "female" ? "checked" : ""}> Женский</label>
-        </div>
-      </label>
+      <article class="screen-card">
+        <label class="field">
+          <span>Пол</span>
+          <div class="choices">
+            <label><input type="radio" name="gender" value="male" ${state.demographics.gender === "male" ? "checked" : ""}> Мужской</label>
+            <label><input type="radio" name="gender" value="female" ${state.demographics.gender === "female" ? "checked" : ""}> Женский</label>
+          </div>
+        </label>
 
-      <label class="field">
-        <span>ID</span>
-        <input type="text" id="userLabel" value="${(state.demographics.user_label || "").replace(/"/g, "&quot;")}" placeholder="Придумайте имя" autocomplete="off">
-        <small class="hint">Необходимо для систематизации анализа данных.</small>
-      </label>
+        <label class="field">
+          <span>ID</span>
+          <input type="text" id="userLabel" value="${(state.demographics.user_label || "").replace(/"/g, "&quot;")}" placeholder="Придумайте имя" autocomplete="off">
+          <small class="hint">Необходимо для систематизации анализа данных.</small>
+        </label>
 
-      <label class="field">
-        <span>Возраст</span>
-        <input type="text" id="age" value="${(state.demographics.age || "").replace(/"/g, "&quot;")}" inputmode="numeric" placeholder="XX" autocomplete="off">
-        <small class="hint">Только цифры, не более двух знаков.</small>
-      </label>
+        <label class="field">
+          <span>Возраст</span>
+          <input type="text" id="age" value="${(state.demographics.age || "").replace(/"/g, "&quot;")}" inputmode="numeric" placeholder="XX" autocomplete="off">
+          <small class="hint">Только цифры, не более двух знаков.</small>
+        </label>
 
-      <label class="field">
-        <span>Есть ли диагностированные психические заболевания?</span>
-        <div class="choices">
-          <label><input type="radio" name="dx" value="yes" ${state.demographics.dx === "yes" ? "checked" : ""}> Да</label>
-          <label><input type="radio" name="dx" value="no" ${state.demographics.dx === "no" ? "checked" : ""}> Нет</label>
-        </div>
-      </label>
-    </article>
+        <label class="field">
+          <span>Есть ли диагностированные психические заболевания?</span>
+          <div class="choices">
+            <label><input type="radio" name="dx" value="yes" ${state.demographics.dx === "yes" ? "checked" : ""}> Да</label>
+            <label><input type="radio" name="dx" value="no" ${state.demographics.dx === "no" ? "checked" : ""}> Нет</label>
+          </div>
+        </label>
+      </article>
+    </div>
   `;
 
   screenRoot.querySelectorAll('input[name="gender"]').forEach((el) => {
@@ -577,10 +587,14 @@ function renderDemographics() {
 function renderInstrumentIntro(screen) {
   const instrument = instruments[screen.instrumentId];
   screenRoot.innerHTML = `
-    <article class="screen-card screen-card--soft-violet">
-      <h2>${instrument.title}</h2>
-      <p class="lead">${instrument.intro}</p>
-    </article>
+    <div class="screen-section">
+      <article class="screen-card screen-title-box">
+        <h2>${instrument.title}</h2>
+      </article>
+      <article class="screen-card screen-instruction-box screen-instruction-box--center">
+        <p class="lead">${instrument.intro}</p>
+      </article>
+    </div>
   `;
 }
 
@@ -648,12 +662,16 @@ function renderSubmit() {
     : "";
 
   screenRoot.innerHTML = `
-    <article class="screen-card screen-card--soft-violet">
-      <h2>Завершение</h2>
-      <p class="lead">Ура! Нажмите «Отправить» для завершения исследования. Пожалуйста, дождитесь появления окна о том, что ваши ответы отправлены.</p>
-      ${successHtml}
-      ${errorHtml}
-    </article>
+    <div class="screen-section">
+      <article class="screen-card screen-title-box">
+        <h2>Завершение</h2>
+      </article>
+      <article class="screen-card screen-instruction-box screen-instruction-box--center">
+        <p class="lead">Ура! Нажмите «Отправить» для завершения исследования. Пожалуйста, дождитесь появления окна о том, что ваши ответы отправлены.</p>
+        ${successHtml}
+        ${errorHtml}
+      </article>
+    </div>
   `;
 }
 
@@ -695,7 +713,7 @@ function renderResults() {
         <div class="result-box result-box--title">
           <h3 class="result-block__title">SIFS</h3>
         </div>
-        <div class="result-box result-box--index">
+        <div class="result-box">
           ${renderBarRow("Индекс тяжести", r.sifsTotal, 0, 4)}
           ${renderMinMaxRow(0, 4, 0)}
           <p class="result-note">Интерпретация общего индекса: <strong>${sifsSeverity(r.sifsTotal)}</strong>.</p>
