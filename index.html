@@ -2,30 +2,35 @@
 <html lang="ru">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Опрос</title>
-  <link rel="stylesheet" href="styles_rewritten.css?v=3" />
+  <link rel="stylesheet" href="styles.css?v=3" />
 </head>
 <body>
-  <main class="app-shell">
-    <div id="screenRoot" class="screen-root" aria-live="polite"></div>
+  <main class="wrap">
+    <header class="top">
+      <h1>Исследование</h1>
+    </header>
+
+    <form id="surveyForm" novalidate>
+      <section id="screenRoot" class="screen-root"></section>
+
+      <div id="submitError" class="error" hidden>Не удалось отправить ответы. Попробуйте ещё раз.</div>
+      <div id="submitOk" class="ok" hidden>Спасибо! Ответы успешно отправлены.</div>
+
+      <footer class="bottom-dock">
+        <div class="privacy-note">
+          Все данные строго анонимны, анализ проводится в обобщенном виде.
+        </div>
+
+        <div id="navRow" class="nav-row">
+          <button type="button" id="nextBtn" class="btn">Далее</button>
+          <button type="button" id="prevBtn" class="btn secondary">Назад</button>
+          <button type="submit" id="submitBtn" class="btn" hidden>Отправить</button>
+        </div>
+      </footer>
+    </form>
   </main>
-
-  <footer class="fixed-footer" aria-label="Навигация">
-    <div class="privacy-note">
-      Все данные строго анонимны, анализ проводится в обобщённом виде
-    </div>
-
-    <div id="footerNav" class="footer-nav">
-      <button type="button" id="nextBtn" class="footer-btn footer-btn--primary">Далее</button>
-      <button type="button" id="prevBtn" class="footer-btn footer-btn--secondary">Назад</button>
-      <button type="button" id="submitBtn" class="footer-btn footer-btn--primary" hidden>Отправить</button>
-    </div>
-  </footer>
-
-  <script src="app_rewritten.js?v=3"></script>
-</body>
-</html>
 
   <script src="app.js?v=3"></script>
 </body>
