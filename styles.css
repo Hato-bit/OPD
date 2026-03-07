@@ -17,7 +17,7 @@ body {
 
 body {
   margin: 0;
-  font-family: "Lack", "SF Pro Text", "Segoe UI", Roboto, Arial, sans-serif;
+  font-family: "Inter", "Segoe UI", Roboto, Arial, sans-serif;
   background: #f2f4f7;
   color: #14161a;
 }
@@ -46,6 +46,15 @@ textarea {
   font-weight: 800;
 }
 
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: "Manrope", "Inter", "Segoe UI", Roboto, Arial, sans-serif;
+}
+
 .screen-root {
   min-height: 48vh;
 }
@@ -72,14 +81,15 @@ textarea {
 .screen-title-box {
   background: #f4efff;
   border-color: #d8cbf8;
-  padding-top: 12px;
-  padding-bottom: 12px;
+  min-height: 82px;
+  display: flex;
+  align-items: center;
 }
 
 .screen-title-box h1,
 .screen-title-box h2 {
   margin: 0;
-  color: #5533ad;
+  color: #14161a;
 }
 
 .screen-instruction-box {
@@ -244,7 +254,7 @@ textarea {
 
 .local-progress__bar {
   height: 100%;
-  background: #161a20;
+  background: #6f2ccf;
   border-radius: 999px;
   transition: width 170ms ease;
 }
@@ -522,6 +532,10 @@ textarea {
 .result-interpretation p {
   margin: 0 0 10px;
   line-height: 1.55;
+}
+
+.screen-feedback-box {
+  background: #fff;
 }
 
 .result-list {

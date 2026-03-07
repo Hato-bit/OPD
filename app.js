@@ -655,10 +655,18 @@ function renderQuestion(screen) {
 
 function renderSubmit() {
   const successHtml = state.submitted
-    ? `<div class="ok">Благодарю за участие, вы помогли науке! Ответы успешно отправлены.</div>`
+    ? `
+      <article class="screen-card screen-feedback-box">
+        <div class="ok">Благодарю за участие, вы помогли науке! Ответы успешно отправлены.</div>
+      </article>
+    `
     : "";
   const errorHtml = state.submitErrorText
-    ? `<div class="error">${state.submitErrorText}</div>`
+    ? `
+      <article class="screen-card screen-feedback-box">
+        <div class="error">${state.submitErrorText}</div>
+      </article>
+    `
     : "";
 
   screenRoot.innerHTML = `
@@ -668,9 +676,9 @@ function renderSubmit() {
       </article>
       <article class="screen-card screen-instruction-box screen-instruction-box--center">
         <p class="lead">Ура! Нажмите «Отправить» для завершения исследования. Пожалуйста, дождитесь появления окна о том, что ваши ответы отправлены.</p>
-        ${successHtml}
-        ${errorHtml}
       </article>
+      ${successHtml}
+      ${errorHtml}
     </div>
   `;
 }
