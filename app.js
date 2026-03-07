@@ -339,6 +339,10 @@ function fmt(value) {
   return typeof value === "number" ? value.toFixed(2) : "—";
 }
 
+function fmtWith(value, decimals = 2) {
+  return typeof value === "number" ? value.toFixed(decimals) : "—";
+}
+
 function pct(value, min, max) {
   if (typeof value !== "number") return 0;
   const clamped = Math.min(max, Math.max(min, value));
@@ -354,12 +358,10 @@ function sifsSeverity(value) {
   return "высокая выраженность личностной дисфункции";
 }
 
-function purpleFillColor(value, min, max) {
-  if (typeof value !== "number") return "hsl(264 72% 78%)";
+function fillOpacity(value, min, max) {
+  if (typeof value !== "number") return 0.55;
   const ratio = pct(value, min, max) / 100;
-  const lightness = 78 - ratio * 34;
-  const saturation = 64 + ratio * 18;
-  return `hsl(264 ${saturation.toFixed(0)}% ${lightness.toFixed(1)}%)`;
+  return 0.55 + ratio * 0.45;
 }
 
 function buildResultsModel() {
@@ -375,7 +377,7 @@ function buildResultsModel() {
   const phqDepression = sumOf(phq, [3, 4]);
   const phqTotal = sumOf(phq, [1, 2, 3, 4]);
 
-  const opdTotalMean = meanOf(m1, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
+  const opdTotalSum = sumOf(m1, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
 
   const sifsIdentity = meanOf(m2, [1, 2, 3, 4, 5, 6, 7]);
   const sifsSelfDirection = meanOf(m2, [8, 9, 10, 11, 12]);
@@ -393,7 +395,7 @@ function buildResultsModel() {
     phqAnxiety,
     phqDepression,
     phqTotal,
-    opdTotalMean,
+    opdTotalSum,
     sifsIdentity,
     sifsSelfDirection,
     sifsEmpathy,
@@ -407,15 +409,15 @@ function buildResultsModel() {
   };
 }
 
-function renderBarRow(label, value, min, max) {
-  const fillColor = purpleFillColor(value, min, max);
+function renderBarRow(label, value, min, max, decimals = 2) {
+  const opacity = fillOpacity(value, min, max);
   return `
     <div class="result-row">
       <div class="result-row__label">${label}</div>
       <div class="result-row__bar">
-        <div class="result-row__fill" style="width:${pct(value, min, max)}%; --fill-color:${fillColor};"></div>
+        <div class="result-row__fill" style="width:${pct(value, min, max)}%; --fill-opacity:${opacity};"></div>
       </div>
-      <div class="result-row__value">${fmt(value)}</div>
+      <div class="result-row__value">${fmtWith(value, decimals)}</div>
     </div>
   `;
 }
@@ -643,18 +645,23 @@ function renderResults() {
 
   screenRoot.innerHTML = `
     <article class="screen-card results-screen">
-      <h2>Результаты</h2>
+      <div class="results-top">
+        <h2>Результаты</h2>
+        <button type="button" id="exportPdfBtn" class="result-export-btn">Скачать PDF</button>
+      </div>
+      <p class="result-warning"><strong>Важно:</strong> представленные результаты и их интерпретация носят исключительно ознакомительный характер и не заменяют профессиональную психологическую диагностику. Диагностически значимые выводы могут быть сделаны только специалистом на основе полноценного обследования.</p>
 
       <section class="result-block">
         <h3 class="result-block__title">PHQ-4</h3>
-        ${renderBarRow("Тревога", r.phqAnxiety, 0, 6)}
-        ${renderBarRow("Депрессия", r.phqDepression, 0, 6)}
+        ${renderBarRow("Тревога", r.phqAnxiety, 0, 6, 0)}
+        ${renderBarRow("Депрессия", r.phqDepression, 0, 6, 0)}
         <p class="result-note">Тревога и депрессия считаются клинически значимыми при значениях <strong>≥ 3</strong>.</p>
       </section>
 
       <section class="result-block">
         <h3 class="result-block__title">OPD-SQS</h3>
-        ${renderBarRow("Общий балл", r.opdTotalMean, 0, 4)}
+        ${renderBarRow("Общий балл", r.opdTotalSum, 0, 48, 0)}
+        <p class="result-note">Технические баллы. Опросник в процессе адаптации.</p>
       </section>
 
       <section class="result-block">
@@ -710,6 +717,13 @@ function renderResults() {
       </section>
     </article>
   `;
+
+  const exportBtn = document.getElementById("exportPdfBtn");
+  if (exportBtn) {
+    exportBtn.addEventListener("click", () => {
+      window.print();
+    });
+  }
 }
 
 function updateNavState() {
