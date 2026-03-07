@@ -149,7 +149,7 @@ function buildScreens() {
     { type: "demographics" },
   ];
 
-  ["phq4", "m1", "m2", "m3"].forEach((instrumentId) => {
+  ["m1", "phq4", "m2", "m3"].forEach((instrumentId) => {
     out.push({ type: "instrument_intro", instrumentId });
     instruments[instrumentId].questions.forEach((_, idx) => {
       out.push({
@@ -673,6 +673,16 @@ function renderResults() {
       <p class="result-warning"><strong>Важно:</strong> представленные результаты и их интерпретация носят исключительно ознакомительный характер и не заменяют профессиональную психологическую диагностику. Диагностически значимые выводы могут быть сделаны только специалистом на основе полноценного обследования.</p>
 
       <section class="result-block">
+        <h3 class="result-block__title">OPD-SQS</h3>
+        ${renderBarRow("Общий балл", r.opdTotalSum, 0, 48, 0)}
+        ${renderThresholdRow(0, 48, [
+          { value: 0, label: "[0", tone: "low" },
+          { value: 48, label: "48]", tone: "high" },
+        ])}
+        <p class="result-note">Технические баллы. Опросник в процессе адаптации.</p>
+      </section>
+
+      <section class="result-block">
         <h3 class="result-block__title">PHQ-4</h3>
         ${renderBarRow("Тревога", r.phqAnxiety, 0, 6, 0)}
         ${renderBarRow("Депрессия", r.phqDepression, 0, 6, 0)}
@@ -683,16 +693,6 @@ function renderResults() {
           { value: 6, label: "6]", tone: "high" },
         ])}
         <p class="result-note">Тревога и депрессия считаются клинически значимыми при значениях <strong>≥ 3</strong>.</p>
-      </section>
-
-      <section class="result-block">
-        <h3 class="result-block__title">OPD-SQS</h3>
-        ${renderBarRow("Общий балл", r.opdTotalSum, 0, 48, 0)}
-        ${renderThresholdRow(0, 48, [
-          { value: 0, label: "[0", tone: "low" },
-          { value: 48, label: "48]", tone: "high" },
-        ])}
-        <p class="result-note">Технические баллы. Опросник в процессе адаптации.</p>
       </section>
 
       <section class="result-block">
