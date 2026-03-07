@@ -655,18 +655,10 @@ function renderQuestion(screen) {
 
 function renderSubmit() {
   const successHtml = state.submitted
-    ? `
-      <article class="screen-card screen-feedback-box">
-        <div class="ok">Благодарю за участие, вы помогли науке! Ответы успешно отправлены.</div>
-      </article>
-    `
+    ? `<div class="ok">Благодарю за участие, вы помогли науке! Ответы успешно отправлены.</div>`
     : "";
   const errorHtml = state.submitErrorText
-    ? `
-      <article class="screen-card screen-feedback-box">
-        <div class="error">${state.submitErrorText}</div>
-      </article>
-    `
+    ? `<div class="error">${state.submitErrorText}</div>`
     : "";
 
   screenRoot.innerHTML = `

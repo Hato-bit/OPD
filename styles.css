@@ -18,7 +18,7 @@ body {
 body {
   margin: 0;
   font-family: "Inter", "Segoe UI", Roboto, Arial, sans-serif;
-  background: #f2f4f7;
+  background: #f3eeff;
   color: #14161a;
 }
 
@@ -69,8 +69,8 @@ h6 {
 }
 
 .screen-card--soft-violet {
-  background: #f6f2ff;
-  border-color: #ddd3f6;
+  background: #e1ccfc;
+  border-color: #e1ccfc;
 }
 
 .screen-section {
@@ -79,8 +79,8 @@ h6 {
 }
 
 .screen-title-box {
-  background: #f4efff;
-  border-color: #d8cbf8;
+  background: #e1ccfc;
+  border-color: #e1ccfc;
   min-height: 82px;
   display: flex;
   align-items: center;
@@ -414,8 +414,8 @@ h6 {
   margin: 0;
   padding: 10px 12px;
   border-radius: 10px;
-  border: 1px solid #d7ccf5;
-  background: #efe9ff;
+  border: 1px solid #ffbfdc;
+  background: #ffbfdc;
   color: #2b1864;
   line-height: 1.5;
 }
@@ -433,8 +433,8 @@ h6 {
 }
 
 .result-box--title {
-  background: #f5f3ff;
-  border-color: #ddd5fb;
+  background: #e1ccfc;
+  border-color: #e1ccfc;
   padding-top: 10px;
   padding-bottom: 10px;
 }
@@ -532,10 +532,6 @@ h6 {
 .result-interpretation p {
   margin: 0 0 10px;
   line-height: 1.55;
-}
-
-.screen-feedback-box {
-  background: #fff;
 }
 
 .result-list {
