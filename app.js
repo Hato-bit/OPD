@@ -343,14 +343,14 @@ function renderDemographics() {
       </label>
 
       <label class="field">
-        <span>LABEL</span>
-        <input type="text" id="userLabel" value="${(state.demographics.user_label || "").replace(/"/g, "&quot;")}" placeholder="Фамилия/Имя/ник" autocomplete="off">
-        <small class="hint">Рекомендуется псевдоним/ник, не идентифицирующий личность.</small>
+        <span>ID</span>
+        <input type="text" id="userLabel" value="${(state.demographics.user_label || "").replace(/"/g, "&quot;")}" placeholder="Придумайте имя" autocomplete="off">
+        <small class="hint">Необходимо для систематизации анализа данных.</small>
       </label>
 
       <label class="field">
         <span>Возраст</span>
-        <input type="text" id="age" value="${(state.demographics.age || "").replace(/"/g, "&quot;")}" inputmode="numeric" placeholder="Например, 27" autocomplete="off">
+        <input type="text" id="age" value="${(state.demographics.age || "").replace(/"/g, "&quot;")}" inputmode="numeric" placeholder="XX" autocomplete="off">
         <small class="hint">Только цифры, не более двух знаков.</small>
       </label>
 
