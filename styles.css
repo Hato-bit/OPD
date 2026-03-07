@@ -372,15 +372,32 @@ body {
   line-height: 1.5;
 }
 
-.result-block {
+.result-group {
+  display: grid;
+  gap: 10px;
+}
+
+.result-box {
   border: 1px solid #dfe4ed;
   border-radius: 14px;
   padding: 14px;
   background: #fbfcff;
 }
 
+.result-box--title {
+  background: #f5f3ff;
+  border-color: #ddd5fb;
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+.result-box--index {
+  border-color: #d4cbf7;
+  background: #f8f5ff;
+}
+
 .result-block__title {
-  margin: 0 0 12px;
+  margin: 0;
   font-size: 24px;
 }
 
@@ -456,9 +473,7 @@ body {
 }
 
 .result-interpretation {
-  margin-top: 10px;
-  border-top: 1px solid #e2e7f1;
-  padding-top: 10px;
+  margin-top: 0;
 }
 
 .result-interpretation h4 {
