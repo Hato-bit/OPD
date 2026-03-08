@@ -216,6 +216,7 @@ const state = {
   currentScreenIndex: 0,
   submitting: false,
   submitted: false,
+  submitAttempts: 0,
   respondentId: uuidv4(),
   submitErrorText: "",
   autoAdvancing: false,
@@ -928,9 +929,10 @@ function updateNavState() {
   prevBtn.disabled = state.submitting;
 
   if (isSubmit) {
+    const canOpenResults = state.submitted || state.submitAttempts >= 2;
     nextBtn.hidden = true;
     resultBtn.hidden = false;
-    resultBtn.disabled = !state.submitted || state.submitting;
+    resultBtn.disabled = !canOpenResults || state.submitting;
     submitBtn.hidden = false;
     submitBtn.disabled = state.submitting || state.submitted;
     return;
@@ -1004,6 +1006,7 @@ async function handleSubmit(e) {
   }
 
   try {
+    state.submitAttempts += 1;
     state.submitting = true;
     state.submitted = false;
     state.submitErrorText = "";
@@ -1028,7 +1031,7 @@ prevBtn.addEventListener("click", goPrev);
 nextBtn.addEventListener("click", handleNextClick);
 resultBtn.addEventListener("click", () => {
   const screen = getCurrentScreen();
-  if (screen.type === "submit" && state.submitted) {
+  if (screen.type === "submit" && (state.submitted || state.submitAttempts >= 2)) {
     goNext();
   }
 });
