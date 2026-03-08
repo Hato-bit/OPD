@@ -748,6 +748,7 @@ function renderResults() {
         <div class="result-box">
           ${renderBarRow("Общий балл", r.opdTotalSum, 0, 48, 0)}
           ${renderMinMaxRow(0, 48, 0)}
+          <p class="result-note">Технические баллы. Опросник в процессе адаптации.</p>
           <p class="result-note">Процентиль: ${r.opdTotalPercentile == null ? "—" : `${r.opdTotalPercentile}-й`}. Ваш балл выше, чем у ${r.opdTotalPercentile == null ? "—" : r.opdTotalPercentile}% людей в нормативной выборке Германии.</p>
         </div>
         <div class="result-box result-box--danger">
