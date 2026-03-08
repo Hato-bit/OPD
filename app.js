@@ -1038,10 +1038,9 @@ async function handleSubmit(e) {
     render();
   } catch (err) {
     state.submitErrorText = humanizeSubmitError(err);
-    render();
   } finally {
     state.submitting = false;
-    updateNavState();
+    render();
   }
 }
 
