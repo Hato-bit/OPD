@@ -318,11 +318,35 @@ function humanizeSubmitError(err) {
     return "Не удалось отправить данные.";
   }
 
-  if (/load failed|failed to fetch|networkerror|network request failed/i.test(raw)) {
+  if (isNetworkSubmitError(err)) {
     return "Связь с сервером прервалась при получении ответа. Данные могли уже сохраниться в OSF. Проверьте хранилище перед повторной отправкой.";
   }
 
   return raw;
+}
+
+function isNetworkSubmitError(err) {
+  const raw = String(err?.message || err || "");
+  return /load failed|failed to fetch|networkerror|network request failed/i.test(raw);
+}
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function postSubmit(payload) {
+  const res = await fetch(SUBMIT_ENDPOINT, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    throw new Error(`Ошибка отправки: ${res.status} ${text}`);
+  }
+
+  return res;
 }
 
 function findFirstMissingQuestionScreenIndex() {
@@ -961,16 +985,14 @@ async function handleSubmit(e) {
     updateNavState();
 
     const payload = buildPayload();
-
-    const res = await fetch(SUBMIT_ENDPOINT, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-
-    if (!res.ok) {
-      const text = await res.text().catch(() => "");
-      throw new Error(`Ошибка отправки: ${res.status} ${text}`);
+    try {
+      await postSubmit(payload);
+    } catch (err) {
+      if (!isNetworkSubmitError(err)) {
+        throw err;
+      }
+      await sleep(700);
+      await postSubmit(payload);
     }
 
     state.submitted = true;
