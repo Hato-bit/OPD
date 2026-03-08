@@ -2,6 +2,7 @@
 const SUBMIT_ENDPOINT = "https://opd-osf-submit.golubmoskva.workers.dev/submit";
 const SUBMIT_MAX_NETWORK_ATTEMPTS = 3;
 const SUBMIT_RETRY_DELAYS_MS = [700, 1500];
+const SUBMIT_REQUEST_TIMEOUT_MS = 15000;
 // ====================
 
 const form = document.getElementById("surveyForm");
@@ -330,7 +331,7 @@ function humanizeSubmitError(err) {
 
 function isNetworkSubmitError(err) {
   const raw = String(err?.message || err || "");
-  return /load failed|failed to fetch|networkerror|network request failed/i.test(raw);
+  return /load failed|failed to fetch|networkerror|network request failed|abort|timeout/i.test(raw);
 }
 
 function sleep(ms) {
@@ -338,11 +339,24 @@ function sleep(ms) {
 }
 
 async function postSubmit(payload) {
-  const res = await fetch(SUBMIT_ENDPOINT, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  });
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), SUBMIT_REQUEST_TIMEOUT_MS);
+  let res;
+  try {
+    res = await fetch(SUBMIT_ENDPOINT, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+      signal: controller.signal,
+    });
+  } catch (err) {
+    if (String(err?.name || "") === "AbortError") {
+      throw new Error(`Submit timeout after ${SUBMIT_REQUEST_TIMEOUT_MS}ms`);
+    }
+    throw err;
+  } finally {
+    clearTimeout(timeoutId);
+  }
 
   if (!res.ok) {
     const text = await res.text().catch(() => "");
@@ -773,6 +787,9 @@ function renderQuestion(screen) {
 }
 
 function renderSubmit() {
+  const loadingHtml = state.submitting
+    ? `<div class="ok">Идет отправка данных. Обычно это занимает до 15 секунд.</div>`
+    : "";
   const successHtml = state.submitted
     ? `<div class="ok">Благодарю за участие, вы помогли науке! Ответы успешно отправлены.</div>`
     : "";
@@ -788,6 +805,7 @@ function renderSubmit() {
       <article class="screen-card screen-instruction-box screen-instruction-box--center">
         <p class="lead"><strong>Ура!</strong> Нажмите <strong>«Отправить»</strong> для завершения исследования. Пожалуйста, дождитесь появления окна о том, что ваши ответы отправлены.</p>
       </article>
+      ${loadingHtml}
       ${successHtml}
       ${errorHtml}
     </div>
@@ -1010,7 +1028,7 @@ async function handleSubmit(e) {
     state.submitting = true;
     state.submitted = false;
     state.submitErrorText = "";
-    updateNavState();
+    render();
 
     const payload = buildPayload();
     await submitWithRetries(payload);
