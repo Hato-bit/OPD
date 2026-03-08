@@ -749,7 +749,7 @@ function renderResults() {
           ${renderBarRow("Общий балл", r.opdTotalSum, 0, 48, 0)}
           ${renderMinMaxRow(0, 48, 0)}
           <p class="result-note"><strong>Технические баллы. Опросник в процессе адаптации.<strong></p>
-          <p class="result-note">Процентиль: ${r.opdTotalPercentile == null ? "—" : `${r.opdTotalPercentile}-й`}. Ваш балл выше, чем у ${r.opdTotalPercentile == null ? "—" : r.opdTotalPercentile}% людей в нормативной выборке Германии.</p>
+          <p class="result-note"><strong>Процентиль:<strong> ${r.opdTotalPercentile == null ? "—" : `${r.opdTotalPercentile}-й`}. Ваш балл выше, чем у ${r.opdTotalPercentile == null ? "—" : r.opdTotalPercentile}% людей в нормативной выборке Германии.</p>
         </div>
         <div class="result-box result-box--danger">
           <p><strong>Внимание!</strong> Нормы приведены по данным исследования на взрослой популяции Германии. Для российской версии должны рассчитываться отдельные нормы. Результат предоставлен в ознакомительных и развлекательных целях.</p>
