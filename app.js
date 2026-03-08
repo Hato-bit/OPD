@@ -931,6 +931,9 @@ function renderResults() {
         return;
       }
 
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+        (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+
       const originalText = exportBtn.textContent;
       exportBtn.textContent = "Генерация...";
       exportBtn.disabled = true;
@@ -944,19 +947,35 @@ function renderResults() {
         pagebreak: { mode: ["avoid-all", "css", "legacy"] },
       };
 
-      html2pdf()
-        .set(opt)
-        .from(resultsEl)
-        .save()
-        .then(() => {
-          exportBtn.textContent = originalText;
-          exportBtn.disabled = false;
-        })
-        .catch(() => {
-          exportBtn.textContent = originalText;
-          exportBtn.disabled = false;
-          window.print();
-        });
+      const worker = html2pdf().set(opt).from(resultsEl);
+
+      if (isIOS) {
+        worker
+          .outputPdf("blob")
+          .then((blob) => {
+            const url = URL.createObjectURL(blob);
+            window.open(url, "_blank");
+            exportBtn.textContent = originalText;
+            exportBtn.disabled = false;
+          })
+          .catch(() => {
+            exportBtn.textContent = originalText;
+            exportBtn.disabled = false;
+            alert("Не удалось создать PDF. Используйте «Поделиться» → «Печать» → «Сохранить в PDF».");
+          });
+      } else {
+        worker
+          .save()
+          .then(() => {
+            exportBtn.textContent = originalText;
+            exportBtn.disabled = false;
+          })
+          .catch(() => {
+            exportBtn.textContent = originalText;
+            exportBtn.disabled = false;
+            window.print();
+          });
+      }
     });
   }
 }
