@@ -6,7 +6,7 @@ const CORS_HEADERS = {
 };
 
 const MAX_LABEL_LENGTH = 50;
-const MAX_RESERVE_ATTEMPTS = 20;
+const MAX_NAME_RETRIES = 5;
 const MAX_OSF_PAGES = 100;
 
 const M1_COUNT = 12;
@@ -335,23 +335,16 @@ async function uploadFile(folderRef, fileName, body, token, contentType) {
   return { conflict: false };
 }
 
-function extractNextGlobalIndexFromFolderListing(items) {
-  const re = /_(\d+)\.csv$/;
-  let maxIndex = 0;
-
-  for (const item of items) {
-    if (getResourceKind(item) !== "file") continue;
-    const name = String(getResourceName(item) || "");
-    const match = name.match(re);
-    if (!match) continue;
-
-    const idx = Number(match[1]);
-    if (Number.isInteger(idx) && idx > maxIndex) {
-      maxIndex = idx;
-    }
-  }
-
-  return maxIndex + 1;
+function makeFileBase(safeLabel, respondentId, seed = 0) {
+  const ts = Date.now();
+  const compactId = String(respondentId || "")
+    .replace(/[^A-Za-z0-9]/g, "")
+    .slice(-12) || "anon";
+  const suffix = seed > 0 ? `_${seed}` : "";
+  return {
+    baseName: `${safeLabel}_${ts}_${compactId}${suffix}`,
+    seq: ts,
+  };
 }
 
 function parseNumberSafe(value) {
@@ -451,9 +444,9 @@ function scoreRow(payload, fileLabel, fileSeq) {
     file_seq: fileSeq,
     user_label: payload.user_label || "",
     submitted_at: payload.submitted_at || "",
-    gender: normalized.demographics.gender === "male" ? 0 : normalized.demographics.gender === "female" ? 1 : "",
+    gender: demographics.gender === "male" ? 0 : demographics.gender === "female" ? 1 : "",
     age: demographics.age ?? "",
-    dx: normalized.demographics.dx === "yes" ? 1 : normalized.demographics.dx === "no" ? 0 : "",
+    dx: demographics.dx === "yes" ? 1 : demographics.dx === "no" ? 0 : "",
 
     phq4_anxiety_sum: takeSum(phq4.values, [1, 2]),
     phq4_depression_sum: takeSum(phq4.values, [3, 4]),
@@ -563,17 +556,13 @@ export default {
       const rawFolder = await ensureFolder(base, "raw", token);
       const allRowsFolder = await ensureFolder(base, "all_rows", token);
 
-      const allRowsItems = await listAllChildren(allRowsFolder.childrenHref, token, "List all_rows files");
-      const startSeq = extractNextGlobalIndexFromFolderListing(allRowsItems);
-
       const rawBody = `${JSON.stringify(parsedBody, null, 2)}\n`;
 
       let chosenSeq = null;
       let fileBase = null;
 
-      for (let attempt = 0; attempt < MAX_RESERVE_ATTEMPTS; attempt++) {
-        const seq = startSeq + attempt;
-        const baseName = `${safeLabel}_${seq}`;
+      for (let attempt = 0; attempt < MAX_NAME_RETRIES; attempt++) {
+        const { baseName, seq } = makeFileBase(safeLabel, payload.respondent_id, attempt);
 
         const rawUpload = await uploadFile(
           rawFolder,
@@ -612,9 +601,8 @@ export default {
       }
 
       if (!fileBase) {
-        throw new HttpError(500, "Could not reserve unique file sequence", {
-          startSeq,
-          maxAttempts: MAX_RESERVE_ATTEMPTS,
+        throw new HttpError(500, "Could not reserve unique file name", {
+          maxAttempts: MAX_NAME_RETRIES,
         });
       }
 

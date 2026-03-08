@@ -214,6 +214,7 @@ const state = {
   currentScreenIndex: 0,
   submitting: false,
   submitted: false,
+  respondentId: uuidv4(),
   submitErrorText: "",
   autoAdvancing: false,
   consent: {
@@ -290,7 +291,7 @@ function buildScalePayload(instrumentId) {
 function buildPayload() {
   return {
     schema_version: "2.0",
-    respondent_id: uuidv4(),
+    respondent_id: state.respondentId,
     user_label: String(state.demographics.user_label || "").trim(),
     submitted_at: new Date().toISOString(),
     consent: {
@@ -309,6 +310,19 @@ function buildPayload() {
       m3: buildScalePayload("m3"),
     },
   };
+}
+
+function humanizeSubmitError(err) {
+  const raw = String(err?.message || err || "");
+  if (!raw) {
+    return "Не удалось отправить данные.";
+  }
+
+  if (/load failed|failed to fetch|networkerror|network request failed/i.test(raw)) {
+    return "Связь с сервером прервалась при получении ответа. Данные могли уже сохраниться в OSF. Проверьте хранилище перед повторной отправкой.";
+  }
+
+  return raw;
 }
 
 function findFirstMissingQuestionScreenIndex() {
@@ -748,11 +762,10 @@ function renderResults() {
         <div class="result-box">
           ${renderBarRow("Общий балл", r.opdTotalSum, 0, 48, 0)}
           ${renderMinMaxRow(0, 48, 0)}
-          <p class="result-note"><strong>Технические баллы. Опросник в процессе адаптации.<strong></p>
-          <p class="result-note"><strong>Процентиль:<strong> ${r.opdTotalPercentile == null ? "—" : `${r.opdTotalPercentile}-й`}. Ваш балл выше, чем у ${r.opdTotalPercentile == null ? "—" : r.opdTotalPercentile}% людей в нормативной выборке Германии.</p>
+          <p class="result-note">Процентиль: ${r.opdTotalPercentile == null ? "—" : `${r.opdTotalPercentile}-й`}. Ваш балл выше, чем у ${r.opdTotalPercentile == null ? "—" : r.opdTotalPercentile}% людей в нормативной выборке Германии.</p>
         </div>
         <div class="result-box result-box--danger">
-          <p><strong>Внимание!</strong> Нормы приведены по данным исследования на взрослой популяции Германии. Для российской версии должны рассчитываться отдельные нормы. Результат предоставлен в ознакомительных и развлекательных целях.</p>
+          <p><strong>ВАЖНО:</strong> Нормы приведены по данным исследования на взрослой популяции Германии; для российской версии должны рассчитываться отдельные нормы. Результат предоставлен в ознакомительных и развлекательных целях.</p>
         </div>
         <div class="result-box result-interpretation">
           <h4>Содержательная интерпретация</h4>
@@ -964,7 +977,7 @@ async function handleSubmit(e) {
     state.submitErrorText = "";
     render();
   } catch (err) {
-    state.submitErrorText = err?.message || String(err);
+    state.submitErrorText = humanizeSubmitError(err);
     render();
   } finally {
     state.submitting = false;
