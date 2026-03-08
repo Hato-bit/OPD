@@ -922,7 +922,40 @@ function renderResults() {
   const exportBtn = document.getElementById("exportPdfBtn");
   if (exportBtn) {
     exportBtn.addEventListener("click", () => {
-      window.print();
+      const resultsEl = document.querySelector(".results-screen");
+      if (!resultsEl) return;
+
+      if (typeof html2pdf === "undefined") {
+        window.print();
+        return;
+      }
+
+      const originalText = exportBtn.textContent;
+      exportBtn.textContent = "Генерация...";
+      exportBtn.disabled = true;
+
+      const opt = {
+        margin: [10, 10, 10, 10],
+        filename: "results.pdf",
+        image: { type: "jpeg", quality: 0.95 },
+        html2canvas: { scale: 2, useCORS: true, logging: false },
+        jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+        pagebreak: { mode: ["avoid-all", "css", "legacy"] },
+      };
+
+      html2pdf()
+        .set(opt)
+        .from(resultsEl)
+        .save()
+        .then(() => {
+          exportBtn.textContent = originalText;
+          exportBtn.disabled = false;
+        })
+        .catch(() => {
+          exportBtn.textContent = originalText;
+          exportBtn.disabled = false;
+          window.print();
+        });
     });
   }
 }
