@@ -61,7 +61,7 @@ const m1Questions = [
   "Иногда мои чувства настолько сильны, что мне становится страшно.",
   "Моя ошибка в оценке человека обернулась для меня болезненными последствиями.",
   "Мне трудно устанавливать контакт с другими людьми.",
-  "У меня нестабильная самооценка.",
+  "У меня невысокая самооценка.",
   "Мой опыт таков: если слишком доверять людям, можно получить неожиданные неприятности.",
 ];
 
@@ -143,6 +143,46 @@ const instruments = {
 
 const M2_REVERSE = new Set([1, 6, 8, 12, 17, 19, 24]);
 const M3_REVERSE = new Set([1, 3, 7, 8, 10, 14]);
+const OPD_SQS_TOTAL_TO_PERCENTILE = {
+  0: 8,
+  1: 10,
+  2: 14,
+  3: 18,
+  4: 22,
+  5: 26,
+  6: 31,
+  7: 36,
+  8: 41,
+  9: 45,
+  10: 50,
+  11: 54,
+  12: 59,
+  13: 62,
+  14: 66,
+  15: 70,
+  16: 74,
+  17: 77,
+  18: 79,
+  19: 82,
+  20: 84,
+  21: 86,
+  22: 89,
+  23: 90,
+  24: 92,
+  25: 94,
+  26: 95,
+  27: 95,
+  28: 96,
+  29: 97,
+  30: 98,
+  31: 98,
+  32: 98,
+  33: 99,
+  34: 99,
+  35: 99,
+  36: 99,
+  37: 100,
+};
 
 function buildScreens() {
   const out = [
@@ -361,6 +401,13 @@ function sifsSeverity(value) {
   return "высокая выраженность личностной дисфункции";
 }
 
+function opdPercentileFromTotal(total) {
+  if (typeof total !== "number" || !Number.isFinite(total)) return null;
+  const t = Math.max(0, Math.floor(total));
+  if (t >= 37) return 100;
+  return OPD_SQS_TOTAL_TO_PERCENTILE[t] ?? OPD_SQS_TOTAL_TO_PERCENTILE[0];
+}
+
 function purpleScaleColor(value, min, max) {
   if (typeof value !== "number") return "hsl(262 56% 66%)";
   const ratio = pct(value, min, max) / 100;
@@ -383,6 +430,7 @@ function buildResultsModel() {
   const phqTotal = sumOf(phq, [1, 2, 3, 4]);
 
   const opdTotalSum = sumOf(m1, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
+  const opdTotalPercentile = opdPercentileFromTotal(opdTotalSum);
 
   const sifsIdentity = meanOf(m2, [1, 2, 3, 4, 5, 6, 7]);
   const sifsSelfDirection = meanOf(m2, [8, 9, 10, 11, 12]);
@@ -401,6 +449,7 @@ function buildResultsModel() {
     phqDepression,
     phqTotal,
     opdTotalSum,
+    opdTotalPercentile,
     sifsIdentity,
     sifsSelfDirection,
     sifsEmpathy,
@@ -699,7 +748,14 @@ function renderResults() {
         <div class="result-box">
           ${renderBarRow("Общий балл", r.opdTotalSum, 0, 48, 0)}
           ${renderMinMaxRow(0, 48, 0)}
-          <p class="result-note">Технические баллы. Опросник в процессе адаптации.</p>
+          <p class="result-note">Процентиль: ${r.opdTotalPercentile == null ? "—" : `${r.opdTotalPercentile}-й`}. Ваш балл выше, чем у ${r.opdTotalPercentile == null ? "—" : r.opdTotalPercentile}% людей в нормативной выборке Германии.</p>
+        </div>
+        <div class="result-box result-box--danger">
+          <p><strong>ВАЖНО:</strong> Нормы приведены по данным исследования на взрослой популяции Германии; для российской версии должны рассчитываться отдельные нормы. Результат предоставлен в ознакомительных и развлекательных целях.</p>
+        </div>
+        <div class="result-box result-interpretation">
+          <h4>Содержательная интерпретация</h4>
+          <p>Более высокий балл соответствует более выраженным трудностям в области «структуры» – базовых психологических функций, связанных с самовосприятием и межличностным функционированием. Результат не является диагнозом и не заменяет консультацию специалиста.</p>
         </div>
       </section>
 
