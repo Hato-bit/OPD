@@ -748,11 +748,11 @@ function renderResults() {
         <div class="result-box">
           ${renderBarRow("Общий балл", r.opdTotalSum, 0, 48, 0)}
           ${renderMinMaxRow(0, 48, 0)}
-          <p class="result-note">Технические баллы. Опросник в процессе адаптации.</p>
+          <p class="result-note"><strong>Технические баллы. Опросник в процессе адаптации.<strong></p>
           <p class="result-note">Процентиль: ${r.opdTotalPercentile == null ? "—" : `${r.opdTotalPercentile}-й`}. Ваш балл выше, чем у ${r.opdTotalPercentile == null ? "—" : r.opdTotalPercentile}% людей в нормативной выборке Германии.</p>
         </div>
         <div class="result-box result-box--danger">
-          <p><strong>ВАЖНО:</strong> Нормы приведены по данным исследования на взрослой популяции Германии; для российской версии должны рассчитываться отдельные нормы. Результат предоставлен в ознакомительных и развлекательных целях.</p>
+          <p><strong>Внимание!</strong> Нормы приведены по данным исследования на взрослой популяции Германии. Для российской версии должны рассчитываться отдельные нормы. Результат предоставлен в ознакомительных и развлекательных целях.</p>
         </div>
         <div class="result-box result-interpretation">
           <h4>Содержательная интерпретация</h4>
