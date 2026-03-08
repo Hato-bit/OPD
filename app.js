@@ -830,7 +830,7 @@ function renderResults() {
         <div class="result-box">
           ${renderBarRow("Общий балл", r.opdTotalSum, 0, 48, 0)}
           ${renderMinMaxRow(0, 48, 0)}
-          <p class="result-note"><strong>Процентиль:<strong> ${r.opdTotalPercentile == null ? "—" : `${r.opdTotalPercentile}-й`}. Ваш балл выше, чем у ${r.opdTotalPercentile == null ? "—" : r.opdTotalPercentile}% людей в нормативной выборке Германии.</p>
+          <p class="result-note"><strong>Процентиль:</strong> ${r.opdTotalPercentile == null ? "—" : `${r.opdTotalPercentile}-й`}. Ваш балл выше, чем у ${r.opdTotalPercentile == null ? "—" : r.opdTotalPercentile}% людей в нормативной выборке Германии.</p>
         </div>
         <div class="result-box result-box--danger">
           <p><strong>ВНИИМАНИЕ!</strong> Нормы приведены по данным исследования на взрослой популяции Германии; для российской версии должны рассчитываться отдельные нормы. Результат предоставлен в ознакомительных и развлекательных целях.</p>
