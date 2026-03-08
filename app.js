@@ -508,6 +508,9 @@ function buildResultsModel() {
   const phqTotal = sumOf(phq, [1, 2, 3, 4]);
 
   const opdTotalSum = sumOf(m1, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
+  const opdSelfPerception = sumOf(m1, [1, 2, 5, 8]);
+  const opdContact = sumOf(m1, [4, 6, 10, 11]);
+  const opdRelationshipModel = sumOf(m1, [3, 7, 9, 12]);
   const opdTotalPercentile = opdPercentileFromTotal(opdTotalSum);
 
   const sifsIdentity = meanOf(m2, [1, 2, 3, 4, 5, 6, 7]);
@@ -527,6 +530,9 @@ function buildResultsModel() {
     phqDepression,
     phqTotal,
     opdTotalSum,
+    opdSelfPerception,
+    opdContact,
+    opdRelationshipModel,
     opdTotalPercentile,
     sifsIdentity,
     sifsSelfDirection,
@@ -833,6 +839,12 @@ function renderResults() {
           <p><strong>Технические баллы. Опросник в процессе адаптации</strong></p>
           <p class="result-note"><strong>Процентиль:</strong> ${r.opdTotalPercentile == null ? "—" : `${r.opdTotalPercentile}-й`}. Ваш балл выше, чем у ${r.opdTotalPercentile == null ? "—" : r.opdTotalPercentile}% людей в нормативной выборке Германии.</p>
         </div>
+        <div class="result-box">
+          ${renderBarRow("Самовосприятие", r.opdSelfPerception, 0, 16, 0)}
+          ${renderBarRow("Контакт", r.opdContact, 0, 16, 0)}
+          ${renderBarRow("Модель отношений", r.opdRelationshipModel, 0, 16, 0)}
+          ${renderMinMaxRow(0, 16, 0)}
+        </div>
         <div class="result-box result-box--danger">
           <p><strong>ВНИМАНИЕ!</strong> Нормы приведены по данным исследования на взрослой популяции Германии; для российской версии должны рассчитываться отдельные нормы. Результат предоставлен в ознакомительных и развлекательных целях.</p>
         </div>
@@ -850,6 +862,10 @@ function renderResults() {
           ${renderBarRow("Тревога", r.phqAnxiety, 0, 6, 0)}
           ${renderBarRow("Депрессия", r.phqDepression, 0, 6, 0)}
           ${renderMinMaxRow(0, 6, 0)}
+        </div>
+        <div class="result-box">
+          ${renderBarRow("Общий балл", r.phqTotal, 0, 12, 0)}
+          ${renderMinMaxRow(0, 12, 0)}
           <p class="result-note">Тревога и депрессия считаются клинически значимыми при значениях <strong>≥ 3</strong>.</p>
         </div>
       </section>
