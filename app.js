@@ -1,5 +1,7 @@
 // ====== CONFIG ======
 const SUBMIT_ENDPOINT = "https://opd-osf-submit.golubmoskva.workers.dev/submit";
+const SUBMIT_MAX_NETWORK_ATTEMPTS = 3;
+const SUBMIT_RETRY_DELAYS_MS = [700, 1500];
 // ====================
 
 const form = document.getElementById("surveyForm");
@@ -347,6 +349,29 @@ async function postSubmit(payload) {
   }
 
   return res;
+}
+
+async function submitWithRetries(payload) {
+  let lastError = null;
+
+  for (let attempt = 1; attempt <= SUBMIT_MAX_NETWORK_ATTEMPTS; attempt++) {
+    try {
+      await postSubmit(payload);
+      return;
+    } catch (err) {
+      if (!isNetworkSubmitError(err)) {
+        throw err;
+      }
+      lastError = err;
+      if (attempt >= SUBMIT_MAX_NETWORK_ATTEMPTS) {
+        break;
+      }
+      const delay = SUBMIT_RETRY_DELAYS_MS[attempt - 1] || SUBMIT_RETRY_DELAYS_MS[SUBMIT_RETRY_DELAYS_MS.length - 1] || 700;
+      await sleep(delay);
+    }
+  }
+
+  throw lastError || new Error("Network submit failed");
 }
 
 function findFirstMissingQuestionScreenIndex() {
@@ -985,15 +1010,7 @@ async function handleSubmit(e) {
     updateNavState();
 
     const payload = buildPayload();
-    try {
-      await postSubmit(payload);
-    } catch (err) {
-      if (!isNetworkSubmitError(err)) {
-        throw err;
-      }
-      await sleep(700);
-      await postSubmit(payload);
-    }
+    await submitWithRetries(payload);
 
     state.submitted = true;
     state.submitErrorText = "";
