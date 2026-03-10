@@ -2,7 +2,7 @@
 const SUBMIT_ENDPOINT = "https://opd-osf-submit.golubmoskva.workers.dev/submit";
 const SUBMIT_MAX_NETWORK_ATTEMPTS = 3;
 const SUBMIT_RETRY_DELAYS_MS = [700, 1500];
-const SUBMIT_REQUEST_TIMEOUT_MS = 15000;
+const SUBMIT_REQUEST_TIMEOUT_MS = 45000;
 // ====================
 
 const form = document.getElementById("surveyForm");
@@ -218,6 +218,7 @@ const state = {
   submitting: false,
   submitted: false,
   submitAttempts: 0,
+  allowResultsOnSubmitError: false,
   respondentId: uuidv4(),
   submitErrorText: "",
   autoAdvancing: false,
@@ -323,7 +324,7 @@ function humanizeSubmitError(err) {
   }
 
   if (isNetworkSubmitError(err)) {
-    return "Связь с сервером прервалась при получении ответа. Данные могли уже сохраниться в OSF. Проверьте хранилище перед повторной отправкой.";
+    return "Связь с сервером прервалась при получении ответа. Данные могли уже сохраниться в OSF. Вы можете перейти в «Посмотреть результаты» или проверить хранилище OSF.";
   }
 
   return raw;
@@ -387,6 +388,10 @@ async function submitWithRetries(payload) {
   }
 
   throw lastError || new Error("Network submit failed");
+}
+
+function canOpenResultsFromSubmitScreen() {
+  return state.submitted || state.allowResultsOnSubmitError || state.submitAttempts >= 2;
 }
 
 function findFirstMissingQuestionScreenIndex() {
@@ -1016,7 +1021,7 @@ function updateNavState() {
   prevBtn.disabled = state.submitting;
 
   if (isSubmit) {
-    const canOpenResults = state.submitted || state.submitAttempts >= 2;
+    const canOpenResults = canOpenResultsFromSubmitScreen();
     nextBtn.hidden = true;
     resultBtn.hidden = false;
     resultBtn.disabled = !canOpenResults || state.submitting;
@@ -1103,9 +1108,13 @@ async function handleSubmit(e) {
     await submitWithRetries(payload);
 
     state.submitted = true;
+    state.allowResultsOnSubmitError = false;
     state.submitErrorText = "";
     render();
   } catch (err) {
+    if (isNetworkSubmitError(err)) {
+      state.allowResultsOnSubmitError = true;
+    }
     state.submitErrorText = humanizeSubmitError(err);
   } finally {
     state.submitting = false;
@@ -1117,7 +1126,7 @@ prevBtn.addEventListener("click", goPrev);
 nextBtn.addEventListener("click", handleNextClick);
 resultBtn.addEventListener("click", () => {
   const screen = getCurrentScreen();
-  if (screen.type === "submit" && (state.submitted || state.submitAttempts >= 2)) {
+  if (screen.type === "submit" && canOpenResultsFromSubmitScreen()) {
     goNext();
   }
 });
